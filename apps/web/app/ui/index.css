@@ -1,0 +1,18 @@
+.tool-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    margin: 2px;
+}
+
+.color-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    margin: 2px;
+    background-color: gainsboro;
+}
