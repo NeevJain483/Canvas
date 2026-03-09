@@ -1,16 +1,19 @@
 .tool-box,.color-box{
     position: absolute;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    top: 50%;
-    translate: 0 -50%;
+    
 }
 
 .color-box{
+    flex-direction: column;
     left: 0px;
+    top: 50%;
+    translate: 0 -50%;
 }
 .tool-box{
-    right: 0px;
+    flex-direction: row;
+    right: 50%;
+    translate: 50% 0;
 }
