@@ -1,23 +1,13 @@
 "use client";
-import { useRef, useEffect } from "react";
-import {
-  PencilTool,
-  ToolManager,
-  RectrangleTool,
-  EllipseTool,
-  BrushTool,
-  LineTool,
-} from "../script/tools";
-import ToolButton from "../app/ui/ToolButton";
-import { FaRegCircle, FaPencil, FaBrush } from "react-icons/fa6";
-import { RiRectangleLine } from "react-icons/ri";
-import { TbLine } from "react-icons/tb";
+import { useRef, useEffect, useState } from "react";
+import { ToolManager } from "../script/tools";
 import "./index.css";
-import ColorButton from "../app/ui/ColorButton";
-
+import ColorBox from "./ColorBox";
+import ToolBox from "./ToolBox";
 const Draw = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const toolManagerRef = useRef<ToolManager | null>(null);
+  const [showColor,setShowColor] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -50,69 +40,8 @@ const Draw = () => {
   }, []);
   return (
     <div style={{ height: "100vh", overflow: "hidden" }}>
-      <div className="edit-box">
-        <div className="color-box">
-          <ColorButton
-            color="#000"
-            setColor={() => toolManagerRef.current!.setColor("#000")}
-          />
-          <ColorButton
-            color="#fff"
-            setColor={() => toolManagerRef.current!.setColor("#fff")}
-          />
-          <ColorButton
-            color="#f00"
-            setColor={() => toolManagerRef.current!.setColor("#f00")}
-          />
-          <ColorButton
-            color="#0f0"
-            setColor={() => toolManagerRef.current!.setColor("#0f0")}
-          />
-          <ColorButton
-            color="#00f"
-            setColor={() => toolManagerRef.current!.setColor("#00f")}
-          />
-        </div>
-        <div className="tool-box">
-          <ToolButton
-            label={<FaPencil />}
-            createTool={() => new PencilTool()}
-            setTool={(t) => toolManagerRef.current?.setTool(t)}
-          />
-          <ToolButton
-            label={<TbLine />}
-            createTool={() =>
-              new LineTool(canvasRef.current!.width, canvasRef.current!.height)
-            }
-            setTool={(t) => toolManagerRef.current?.setTool(t)}
-          />
-          <ToolButton
-            label={<FaRegCircle />}
-            createTool={() =>
-              new EllipseTool(
-                canvasRef.current!.width,
-                canvasRef.current!.height,
-              )
-            }
-            setTool={(t) => toolManagerRef.current?.setTool(t)}
-          />
-          <ToolButton
-            label={<RiRectangleLine />}
-            createTool={() =>
-              new RectrangleTool(
-                canvasRef.current!.width,
-                canvasRef.current!.height,
-              )
-            }
-            setTool={(t) => toolManagerRef.current?.setTool(t)}
-          />
-          <ToolButton
-            label={<FaBrush />}
-            createTool={() => new BrushTool()}
-            setTool={(t) => toolManagerRef.current?.setTool(t)}
-          />
-        </div>
-      </div>
+      {showColor && <ColorBox toolManagerRef={toolManagerRef}></ColorBox>}
+      <ToolBox setShowColor={setShowColor} canvasRef={canvasRef} toolManagerRef={toolManagerRef} />
       <canvas ref={canvasRef} id="canvas"></canvas>
     </div>
   );

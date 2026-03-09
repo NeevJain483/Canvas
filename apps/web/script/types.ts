@@ -1,6 +1,6 @@
 export interface Tool {
   name: string;
-  setColor(color: string): void;
+  setColor?(color: string): void;
   onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void;
   onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D): void;
   onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D): void;

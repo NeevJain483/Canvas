@@ -1,13 +1,16 @@
-.edit-box{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 10px;
-}
 .tool-box,.color-box{
+    position: absolute;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    top: 50%;
+    translate: 0 -50%;
+}
+
+.color-box{
+    left: 0px;
+}
+.tool-box{
+    right: 0px;
 }
