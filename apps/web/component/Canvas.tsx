@@ -4,10 +4,12 @@ import { ToolManager } from "../script/tools";
 import "./index.css";
 import ColorBox from "./ColorBox";
 import ToolBox from "./ToolBox";
+import Function from "./function";
+
 const Draw = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const toolManagerRef = useRef<ToolManager | null>(null);
-  const [showColor,setShowColor] = useState(false);
+  const [showColor, setShowColor] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -19,7 +21,7 @@ const Draw = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const toolManager = new ToolManager();
+    const toolManager = new ToolManager(ctx);
     toolManagerRef.current = toolManager;
 
     const handleMouseDown = (e: MouseEvent) =>
@@ -41,7 +43,12 @@ const Draw = () => {
   return (
     <div style={{ height: "100vh", overflow: "hidden" }}>
       {showColor && <ColorBox toolManagerRef={toolManagerRef}></ColorBox>}
-      <ToolBox setShowColor={setShowColor} canvasRef={canvasRef} toolManagerRef={toolManagerRef} />
+      <ToolBox
+        setShowColor={setShowColor}
+        canvasRef={canvasRef}
+        toolManagerRef={toolManagerRef}
+      />
+      <Function canvas={canvasRef}></Function>
       <canvas ref={canvasRef} id="canvas"></canvas>
     </div>
   );

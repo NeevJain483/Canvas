@@ -1,4 +1,6 @@
 import { Tool } from "../types";
+import { pushRedoState } from "./redoTool";
+import { emptyUndoStack } from "./undoTool";
 
 export class LineTool implements Tool {
   name = "line";
@@ -35,6 +37,7 @@ export class LineTool implements Tool {
     this.x = event.offsetX;
     this.y = event.offsetY;
     this.snapShot = ctx.getImageData(0, 0, this.canvasX, this.canvasY);
+    emptyUndoStack();
   }
   public onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
     if (this.drawing) {
@@ -43,6 +46,14 @@ export class LineTool implements Tool {
     }
   }
   onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+    const snapShot = ctx.getImageData(
+      0,
+      0,
+      ctx.canvas.width,
+      ctx.canvas.height,
+    );
     this.drawing = false;
+    ctx.closePath();
+    pushRedoState(snapShot);
   }
 }

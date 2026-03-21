@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { Tool } from "../../script/types";
+import { Tool } from "../script/types";
 
 import "./index.css";
 

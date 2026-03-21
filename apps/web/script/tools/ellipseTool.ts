@@ -1,4 +1,6 @@
 import { Tool } from "../types";
+import { pushRedoState } from "./redoTool";
+import { emptyUndoStack } from "./undoTool";
 
 export class EllipseTool implements Tool {
   name = "ellipse";
@@ -12,6 +14,7 @@ export class EllipseTool implements Tool {
   private radiusX: number = 0;
   private radiusY: number = 0;
   private snapshot: ImageData | undefined;
+  private lineWidth = 2;
 
   private color: string = "#000";
 
@@ -24,11 +27,16 @@ export class EllipseTool implements Tool {
     this.color = color;
   }
 
+  setStockWidth(width: number): void {
+    this.lineWidth = width;
+  }
+
   onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
     this.snapshot = ctx.getImageData(0, 0, this.canvasX, this.canvasY);
     this.drawing = true;
     this.startX = event.offsetX;
     this.startY = event.offsetY;
+    emptyUndoStack();
   }
 
   onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
@@ -50,12 +58,20 @@ export class EllipseTool implements Tool {
         Math.PI * 2,
       );
       ctx.strokeStyle = this.color;
+      ctx.lineWidth = this.lineWidth;
       ctx.stroke();
     }
   }
 
   onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+    const snapShot = ctx.getImageData(
+      0,
+      0,
+      ctx.canvas.width,
+      ctx.canvas.height,
+    );
     this.drawing = false;
     ctx.closePath();
+    pushRedoState(snapShot);
   }
 }

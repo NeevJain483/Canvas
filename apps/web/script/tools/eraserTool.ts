@@ -1,4 +1,6 @@
-import { Tool } from "../types";
+import { Pencil, Tool } from "../types";
+import { pushRedoState } from "./redoTool";
+import { emptyUndoStack } from "./undoTool";
 
 export class EraserTool implements Tool {
   name = "Eraser";
@@ -32,17 +34,26 @@ export class EraserTool implements Tool {
     if (this.drawing) {
       const x = event.offsetX;
       const y = event.offsetY;
-      this.drawInterpolated(ctx, x, y);
+      this.drawInterPolated(ctx, x, y);
       this.lastX = x;
       this.lastY = y;
     }
   }
 
   onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+    const snapShot = ctx.getImageData(
+      0,
+      0,
+      ctx.canvas.width,
+      ctx.canvas.height,
+    );
     this.drawing = false;
+    ctx.closePath();
+    pushRedoState(snapShot);
+    emptyUndoStack();
   }
 
-  private drawInterpolated(
+  private drawInterPolated(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
@@ -51,11 +62,15 @@ export class EraserTool implements Tool {
     const dy = y - this.lastY;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    for (let i = 0; i < distance; i++) {
-      const t = i / distance;
+    const steps = Math.ceil(distance / 3);
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
       const ix = this.lastX + dx * t;
       const iy = this.lastY + dy * t;
       this.draw(ctx, ix, iy);
     }
+
+    this.lastX = x;
+    this.lastY = y;
   }
 }

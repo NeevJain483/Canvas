@@ -1,5 +1,5 @@
 import React from "react";
-import ColorButton from "../app/ui/ColorButton";
+import ColorButton from "../ui/ColorButton";
 import { ToolManager } from "../script/tools";
 
 type ColorBoxType = {

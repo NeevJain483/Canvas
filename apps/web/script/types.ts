@@ -1,6 +1,7 @@
 export interface Tool {
   name: string;
   setColor?(color: string): void;
+  setStockWidth?(width: number): void;
   onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void;
   onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D): void;
   onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D): void;
@@ -12,17 +13,24 @@ type Point = {
 };
 
 type BaseShape = {
-  name: string;
+  name: "Pencil" | "Ellipse" | "Brush" | "";
+  color: string;
 };
 
-type Ellipse = BaseShape & {
+export type Pencil = BaseShape & {
+  coordinates: Point[];
+  color: string;
+  lineWidth: number;
+};
+
+export type Ellipse = BaseShape & {
   name: "Ellipse";
   center: Point;
   radiusX: number;
   radiusY: number;
 };
 
-type Rectrangle = BaseShape & {
+export type Rectrangle = BaseShape & {
   name: "Rectrangle";
   x: number;
   y: number;
@@ -30,8 +38,4 @@ type Rectrangle = BaseShape & {
   height: number;
 };
 
-type Snapshot = BaseShape & {
-  image: ImageData;
-};
-
-export type ArtObject = Ellipse | Rectrangle | ImageData | Snapshot;
+export type StatesType = ImageData;

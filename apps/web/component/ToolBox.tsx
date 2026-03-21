@@ -1,5 +1,5 @@
 import React, { SetStateAction } from "react";
-import ToolButton from "../app/ui/ToolButton";
+import ToolButton from "../ui/ToolButton";
 import { CiEraser } from "react-icons/ci";
 import { FaBrush, FaPencil, FaRegCircle } from "react-icons/fa6";
 import { TbLine } from "react-icons/tb";

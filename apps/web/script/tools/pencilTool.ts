@@ -1,36 +1,43 @@
+import { Pencil, Tool } from "../types";
 import { pushRedoState } from "./redoTool";
 import { emptyUndoStack } from "./undoTool";
 
-export class BrushTool {
-  name = "Brush";
+export class PencilTool implements Tool {
+  name = "Pencil";
   private drawing = false;
   private color = "#000";
-  private radius = 2;
   private lastX = 0;
   private lastY = 0;
+  private lineWidth = 2;
+  private pencilData: Pencil = {
+    name: "Pencil",
+    coordinates: [],
+    color: this.color,
+    lineWidth: this.lineWidth,
+  };
 
   setColor(color: string) {
     this.color = color;
   }
-  setSize(size: number) {
-    this.radius = size;
+
+  setStrokeWidth(width: number) {
+    this.lineWidth = width;
   }
 
   onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D) {
     this.drawing = true;
     this.lastX = event.offsetX;
     this.lastY = event.offsetY;
-    this.drawCircle(ctx, this.lastX, this.lastY);
+
+    ctx.beginPath();
+    ctx.strokeStyle = this.color;
+    ctx.moveTo(this.lastX, this.lastY);
     emptyUndoStack();
   }
 
   onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D) {
     if (!this.drawing) return;
-    const x = event.offsetX;
-    const y = event.offsetY;
-    this.drawInterpolated(ctx, x, y);
-    this.lastX = x;
-    this.lastY = y;
+    this.drawInterPolated(ctx, event.offsetX, event.offsetY);
   }
 
   onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D) {
@@ -45,14 +52,7 @@ export class BrushTool {
     pushRedoState(snapShot);
   }
 
-  private drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    ctx.beginPath();
-    ctx.arc(x, y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = this.color;
-    ctx.fill();
-  }
-
-  private drawInterpolated(
+  private drawInterPolated(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
@@ -60,11 +60,24 @@ export class BrushTool {
     const dx = x - this.lastX;
     const dy = y - this.lastY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    for (let i = 0; i < distance; i++) {
-      const t = i / distance;
+
+    const steps = Math.ceil(distance / 5);
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
       const ix = this.lastX + dx * t;
       const iy = this.lastY + dy * t;
-      this.drawCircle(ctx, ix, iy);
+      this.draw(ctx, ix, iy);
+      this.pencilData.coordinates.push({
+        x: ix,
+        y: iy,
+      });
     }
+
+    this.lastX = x;
+    this.lastY = y;
+  }
+  private draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
+    ctx.lineTo(x, y);
+    ctx.stroke();
   }
 }
