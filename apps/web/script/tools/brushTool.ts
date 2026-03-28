@@ -1,7 +1,8 @@
-import { pushRedoState } from "./redoTool";
-import { emptyUndoStack } from "./undoTool";
+import { pushRedoState } from "../functions";
+import { emptyUndoStack } from "../functions";
+import { ToolManagerType } from "../types";
 
-export class BrushTool {
+export class BrushTool implements ToolManagerType {
   name = "Brush";
   private drawing = false;
   private color = "#000";
@@ -12,8 +13,10 @@ export class BrushTool {
   setColor(color: string) {
     this.color = color;
   }
-  setSize(size: number) {
-    this.radius = size;
+
+  setStockWidth(width: number): void {
+    this.radius = width / 2;
+    console.log(this.radius);
   }
 
   onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D) {

@@ -7,5 +7,3 @@ export * from "./ellipseTool";
 export * from "./brushTool";
 export * from "./lineTool";
 export * from "./eraserTool";
-export * from "./redoTool";
-export * from "./undoTool";

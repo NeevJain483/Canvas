@@ -1,12 +1,12 @@
 import React, { ReactNode } from "react";
-import { Tool } from "../script/types";
+import { ToolManagerType } from "../script/types";
 
 import "./index.css";
 
 type ToolButton = {
   label: ReactNode;
-  createTool: () => Tool;
-  setTool(tool: Tool): void;
+  createTool: () => ToolManagerType;
+  setTool(tool: ToolManagerType): void;
 };
 const ToolButton = ({ label, createTool, setTool }: ToolButton) => {
   return (

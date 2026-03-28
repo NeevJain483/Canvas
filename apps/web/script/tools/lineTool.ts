@@ -1,6 +1,6 @@
 import { Tool } from "../types";
-import { pushRedoState } from "./redoTool";
-import { emptyUndoStack } from "./undoTool";
+import { pushRedoState } from "../functions";
+import { emptyUndoStack } from "../functions";
 
 export class LineTool implements Tool {
   name = "line";
@@ -30,6 +30,10 @@ export class LineTool implements Tool {
 
   public setColor(color: string): void {
     this.color = color;
+  }
+
+  setStockWidth(width: number): void {
+    this.lineWidth = width;
   }
 
   public onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void {

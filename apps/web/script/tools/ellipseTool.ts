@@ -1,8 +1,8 @@
-import { Tool } from "../types";
-import { pushRedoState } from "./redoTool";
-import { emptyUndoStack } from "./undoTool";
+import { ToolManagerType } from "../types";
+import { pushRedoState } from "../functions";
+import { emptyUndoStack } from "../functions";
 
-export class EllipseTool implements Tool {
+export class EllipseTool implements ToolManagerType {
   name = "ellipse";
   private drawing = false;
   private startX = 0;

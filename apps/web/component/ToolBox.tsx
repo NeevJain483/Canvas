@@ -12,18 +12,22 @@ import {
   PencilTool,
   RectrangleTool,
   ToolManager,
+  ToolType,
 } from "../script/tools";
+import { tools } from "../script/functions";
 
 type ToolBoxType = {
   toolManagerRef: React.RefObject<ToolManager | null>;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   setShowColor: React.Dispatch<SetStateAction<boolean>>;
+  setActiveTool: React.Dispatch<SetStateAction<ToolType | undefined>>;
 };
 
 const ToolBox: React.FC<ToolBoxType> = ({
   canvasRef,
   toolManagerRef,
   setShowColor,
+  setActiveTool,
 }) => {
   return (
     <>
@@ -34,6 +38,7 @@ const ToolBox: React.FC<ToolBoxType> = ({
           setTool={(t) => {
             toolManagerRef.current?.setTool(t);
             setShowColor(false);
+            setActiveTool(tools["eraser"]);
           }}
         />
         <ToolButton
@@ -42,6 +47,7 @@ const ToolBox: React.FC<ToolBoxType> = ({
           setTool={(t) => {
             toolManagerRef.current?.setTool(t);
             setShowColor(true);
+            setActiveTool(tools["pencil"]);
           }}
         />
         <ToolButton
@@ -52,6 +58,7 @@ const ToolBox: React.FC<ToolBoxType> = ({
           setTool={(t) => {
             toolManagerRef.current?.setTool(t);
             setShowColor(true);
+            setActiveTool(tools["line"]);
           }}
         />
         <ToolButton
@@ -62,6 +69,7 @@ const ToolBox: React.FC<ToolBoxType> = ({
           setTool={(t) => {
             toolManagerRef.current?.setTool(t);
             setShowColor(true);
+            setActiveTool(tools["ellipse"]);
           }}
         />
         <ToolButton
@@ -75,6 +83,7 @@ const ToolBox: React.FC<ToolBoxType> = ({
           setTool={(t) => {
             toolManagerRef.current?.setTool(t);
             setShowColor(true);
+            setActiveTool(tools["rectrangle"]);
           }}
         />
         <ToolButton
@@ -83,6 +92,7 @@ const ToolBox: React.FC<ToolBoxType> = ({
           setTool={(t) => {
             toolManagerRef.current?.setTool(t);
             setShowColor(true);
+            setActiveTool(tools["brush"]);
           }}
         />
       </div>

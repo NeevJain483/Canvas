@@ -1,7 +1,7 @@
 import { replayStroke } from "../replayStates";
 import { Stack } from "../stack";
 import { StatesType } from "../types";
-import { redoStack } from "./redoTool";
+import { redoStack } from "./";
 
 const size = 10;
 export const undoStack = new Stack<StatesType>(size);

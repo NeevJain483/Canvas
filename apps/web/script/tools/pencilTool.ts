@@ -1,26 +1,21 @@
-import { Pencil, Tool } from "../types";
-import { pushRedoState } from "./redoTool";
-import { emptyUndoStack } from "./undoTool";
+import { ToolManagerType } from "../types";
+import { pushRedoState } from "../functions";
+import { emptyUndoStack } from "../functions";
 
-export class PencilTool implements Tool {
+export class PencilTool implements ToolManagerType {
   name = "Pencil";
   private drawing = false;
   private color = "#000";
   private lastX = 0;
   private lastY = 0;
   private lineWidth = 2;
-  private pencilData: Pencil = {
-    name: "Pencil",
-    coordinates: [],
-    color: this.color,
-    lineWidth: this.lineWidth,
-  };
 
   setColor(color: string) {
     this.color = color;
   }
 
   setStrokeWidth(width: number) {
+    console.log("pencil is here");
     this.lineWidth = width;
   }
 
@@ -31,13 +26,23 @@ export class PencilTool implements Tool {
 
     ctx.beginPath();
     ctx.strokeStyle = this.color;
+    ctx.lineWidth = this.lineWidth;
     ctx.moveTo(this.lastX, this.lastY);
+
     emptyUndoStack();
   }
 
   onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D) {
     if (!this.drawing) return;
-    this.drawInterPolated(ctx, event.offsetX, event.offsetY);
+
+    const x = event.offsetX;
+    const y = event.offsetY;
+
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    this.lastX = x;
+    this.lastY = y;
   }
 
   onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D) {
@@ -50,34 +55,5 @@ export class PencilTool implements Tool {
     this.drawing = false;
     ctx.closePath();
     pushRedoState(snapShot);
-  }
-
-  private drawInterPolated(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-  ) {
-    const dx = x - this.lastX;
-    const dy = y - this.lastY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    const steps = Math.ceil(distance / 5);
-    for (let i = 1; i <= steps; i++) {
-      const t = i / steps;
-      const ix = this.lastX + dx * t;
-      const iy = this.lastY + dy * t;
-      this.draw(ctx, ix, iy);
-      this.pencilData.coordinates.push({
-        x: ix,
-        y: iy,
-      });
-    }
-
-    this.lastX = x;
-    this.lastY = y;
-  }
-  private draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    ctx.lineTo(x, y);
-    ctx.stroke();
   }
 }

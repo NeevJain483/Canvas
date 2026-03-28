@@ -1,8 +1,8 @@
-import { Tool } from "../types";
-import { pushRedoState } from "./redoTool";
-import { emptyUndoStack } from "./undoTool";
+import { ToolManagerType } from "../types";
+import { pushRedoState } from "../functions";
+import { emptyUndoStack } from "../functions";
 
-export class RectrangleTool implements Tool {
+export class RectrangleTool implements ToolManagerType {
   name = "rectrangle";
   private drawing = false;
   private startX = 0;
@@ -12,6 +12,7 @@ export class RectrangleTool implements Tool {
   private canvasX;
   private canvasY;
   private snapshot: ImageData | undefined;
+  private thickness = 2;
 
   private color: string = "#000";
 
@@ -22,6 +23,10 @@ export class RectrangleTool implements Tool {
 
   setColor(color: string): void {
     this.color = color;
+  }
+
+  setStockWidth(width: number): void {
+    this.thickness = width;
   }
 
   onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
@@ -36,6 +41,7 @@ export class RectrangleTool implements Tool {
     if (this.drawing) {
       if (!this.snapshot) return;
       ctx.putImageData(this.snapshot, 0, 0);
+      ctx.lineWidth = this.thickness;
       this.width = event.offsetX - this.startX;
       this.height = event.offsetY - this.startY;
       ctx.strokeStyle = this.color;

@@ -1,4 +1,4 @@
-export interface Tool {
+export interface ToolManagerType {
   name: string;
   setColor?(color: string): void;
   setStockWidth?(width: number): void;

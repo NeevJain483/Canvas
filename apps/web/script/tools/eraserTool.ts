@@ -1,6 +1,6 @@
-import { Pencil, Tool } from "../types";
-import { pushRedoState } from "./redoTool";
-import { emptyUndoStack } from "./undoTool";
+import { Tool } from "../types";
+import { pushRedoState } from "../functions";
+import { emptyUndoStack } from "../functions";
 
 export class EraserTool implements Tool {
   name = "Eraser";
@@ -21,6 +21,10 @@ export class EraserTool implements Tool {
     ctx.fill();
     ctx.closePath();
     ctx.restore();
+  }
+
+  setStockWidth(width: number): void {
+    this.radius = width/2
   }
 
   onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void {

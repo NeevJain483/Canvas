@@ -1,19 +1,39 @@
-.tool-box,.color-box{
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
+.tool-box,
+.color-box {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.color-box{
-    flex-direction: column;
-    left: 0px;
-    top: 50%;
-    translate: 0 -50%;
+.color-box {
+  flex-direction: column;
+  left: 0px;
+  top: 50%;
+  translate: 0 -50%;
 }
-.tool-box{
-    flex-direction: row;
-    right: 50%;
-    translate: 50% 0;
+
+.tool-box {
+  flex-direction: row;
+  right: 50%;
+  translate: 50% 0;
+}
+
+#function-box {
+  display: flex;
+  width: 75px;
+  padding: 5px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.function-btn {
+  font-size: 24px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
 }
