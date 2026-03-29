@@ -1,3 +1,7 @@
+canvas{
+  touch-action: none;
+}
+
 .tool-box,
 .color-box {
   position: absolute;

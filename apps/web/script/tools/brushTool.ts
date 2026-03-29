@@ -14,12 +14,23 @@ export class BrushTool implements ToolManagerType {
     this.color = color;
   }
 
-  setStockWidth(width: number): void {
+  setStrokeWidth(width: number): void {
     this.radius = width / 2;
-    console.log(this.radius);
   }
 
-  onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D) {
+  onPointerDown(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.startDrawing(event, ctx);
+  }
+
+  onPointerMove(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.continueDrawing(event, ctx);
+  }
+
+  onPointerUp(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.stopDrawing(event, ctx);
+  }
+
+  private startDrawing(event: PointerEvent, ctx: CanvasRenderingContext2D) {
     this.drawing = true;
     this.lastX = event.offsetX;
     this.lastY = event.offsetY;
@@ -27,7 +38,7 @@ export class BrushTool implements ToolManagerType {
     emptyUndoStack();
   }
 
-  onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D) {
+  private continueDrawing(event: PointerEvent, ctx: CanvasRenderingContext2D) {
     if (!this.drawing) return;
     const x = event.offsetX;
     const y = event.offsetY;
@@ -36,7 +47,7 @@ export class BrushTool implements ToolManagerType {
     this.lastY = y;
   }
 
-  onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D) {
+  private stopDrawing(event: PointerEvent, ctx: CanvasRenderingContext2D) {
     const snapShot = ctx.getImageData(
       0,
       0,

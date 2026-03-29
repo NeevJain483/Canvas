@@ -12,9 +12,9 @@ import {
   PencilTool,
   RectrangleTool,
   ToolManager,
-  ToolType,
 } from "../script/tools";
 import { tools } from "../script/functions";
+import { ToolType } from "../script/functions";
 
 type ToolBoxType = {
   toolManagerRef: React.RefObject<ToolManager | null>;

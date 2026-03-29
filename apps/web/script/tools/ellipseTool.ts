@@ -27,11 +27,23 @@ export class EllipseTool implements ToolManagerType {
     this.color = color;
   }
 
-  setStockWidth(width: number): void {
+  setStrokeWidth(width: number): void {
     this.lineWidth = width;
   }
 
-  onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+  onPointerDown(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.startDrawing(event,ctx);
+  }
+
+  onPointerMove(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.continueDrawing(event,ctx);
+  }
+
+  onPointerUp(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.stopDrawing(event,ctx);
+  }
+
+  private startDrawing(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
     this.snapshot = ctx.getImageData(0, 0, this.canvasX, this.canvasY);
     this.drawing = true;
     this.startX = event.offsetX;
@@ -39,7 +51,7 @@ export class EllipseTool implements ToolManagerType {
     emptyUndoStack();
   }
 
-  onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+  private continueDrawing(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
     if (this.drawing) {
       if (this.snapshot) ctx.putImageData(this.snapshot, 0, 0);
       this.x = (event.offsetX - this.startX) / 2 + this.startX;
@@ -63,7 +75,7 @@ export class EllipseTool implements ToolManagerType {
     }
   }
 
-  onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+  private stopDrawing(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
     const snapShot = ctx.getImageData(
       0,
       0,

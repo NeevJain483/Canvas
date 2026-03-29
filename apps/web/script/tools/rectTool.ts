@@ -25,11 +25,23 @@ export class RectrangleTool implements ToolManagerType {
     this.color = color;
   }
 
-  setStockWidth(width: number): void {
+  setStrokeWidth(width: number): void {
     this.thickness = width;
   }
 
-  onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+  onPointerDown(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.startDrawing(event, ctx);
+  }
+
+  onPointerMove(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.continueDrawing(event, ctx);
+  }
+
+  onPointerUp(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.stopDrawing(event, ctx);
+  }
+
+  private startDrawing(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
     this.snapshot = ctx.getImageData(0, 0, this.canvasX, this.canvasY);
     this.drawing = true;
     ctx.beginPath();
@@ -37,7 +49,10 @@ export class RectrangleTool implements ToolManagerType {
     this.startY = event.offsetY;
     emptyUndoStack();
   }
-  onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+  private continueDrawing(
+    event: MouseEvent,
+    ctx: CanvasRenderingContext2D,
+  ): void {
     if (this.drawing) {
       if (!this.snapshot) return;
       ctx.putImageData(this.snapshot, 0, 0);
@@ -49,7 +64,7 @@ export class RectrangleTool implements ToolManagerType {
     }
   }
 
-  onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+  private stopDrawing(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
     const snapShot = ctx.getImageData(
       0,
       0,

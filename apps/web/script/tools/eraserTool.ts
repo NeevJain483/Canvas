@@ -1,8 +1,8 @@
-import { Tool } from "../types";
+import { ToolManagerType } from "../types";
 import { pushRedoState } from "../functions";
 import { emptyUndoStack } from "../functions";
 
-export class EraserTool implements Tool {
+export class EraserTool implements ToolManagerType {
   name = "Eraser";
   private drawing = false;
   private radius: number;
@@ -13,28 +13,33 @@ export class EraserTool implements Tool {
     this.radius = radius;
   }
 
-  private draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    ctx.save();
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath();
-    ctx.arc(x, y, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
-    ctx.restore();
+  setStrokeWidth(width: number): void {
+    this.radius = width / 2;
   }
 
-  setStockWidth(width: number): void {
-    this.radius = width/2
+  onPointerDown(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.startDrawing(event, ctx);
   }
 
-  onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+  onPointerMove(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.continueDrawing(event, ctx);
+  }
+
+  onPointerUp(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
+    this.stopDrawing(event, ctx);
+  }
+
+  private startDrawing(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
     this.drawing = true;
     this.lastX = event.offsetX;
     this.lastY = event.offsetY;
     this.draw(ctx, this.lastX, this.lastY);
   }
 
-  onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+  private continueDrawing(
+    event: PointerEvent,
+    ctx: CanvasRenderingContext2D,
+  ): void {
     if (this.drawing) {
       const x = event.offsetX;
       const y = event.offsetY;
@@ -44,7 +49,7 @@ export class EraserTool implements Tool {
     }
   }
 
-  onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D): void {
+  private stopDrawing(event: PointerEvent, ctx: CanvasRenderingContext2D): void {
     const snapShot = ctx.getImageData(
       0,
       0,
@@ -55,6 +60,16 @@ export class EraserTool implements Tool {
     ctx.closePath();
     pushRedoState(snapShot);
     emptyUndoStack();
+  }
+
+  private draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath();
+    ctx.arc(x, y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
   }
 
   private drawInterPolated(

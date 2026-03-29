@@ -1,18 +1,6 @@
 import { ToolManagerType } from "../types";
 import { redoStack } from "../functions";
 
-export type ToolType = {
-  name: string;
-  size: number;
-  min: number;
-  max: number;
-};
-
-export const tools: Record<string, ToolType> = {
-  brush: { name: "brush", size: 10, min: 2, max: 48 },
-  eraser: { name: "eraser", size: 20, min: 2, max: 96 },
-};
-
 export class ToolManager {
   private currentTool: ToolManagerType | null = null;
   private color: string = "#000";
@@ -30,24 +18,27 @@ export class ToolManager {
 
   setColor(color: string) {
     this.color = color;
-    if (this.currentTool && this.currentTool.setColor) {
+    if (this.currentTool?.setColor) {
       this.currentTool.setColor(color);
     }
   }
 
   setLineWidth(width: number) {
-    if (this.currentTool && this.currentTool.setStockWidth) {
-      this.currentTool.setStockWidth(width);
+    if (this.currentTool?.setStrokeWidth) {
+      this.currentTool.setStrokeWidth(width);
     }
   }
 
-  handleMouseDown(e: MouseEvent, ctx: CanvasRenderingContext2D) {
-    this.currentTool?.onMouseDown(e, ctx);
+  // Unified pointer logic (mouse, touch, stylus)
+  handlePointerDown(e: PointerEvent, ctx: CanvasRenderingContext2D) {
+    this.currentTool?.onPointerDown(e, ctx);
   }
-  handleMouseMove(e: MouseEvent, ctx: CanvasRenderingContext2D) {
-    this.currentTool?.onMouseMove(e, ctx);
+
+  handlePointerMove(e: PointerEvent, ctx: CanvasRenderingContext2D) {
+    this.currentTool?.onPointerMove(e, ctx);
   }
-  handleMouseUp(e: MouseEvent, ctx: CanvasRenderingContext2D) {
-    this.currentTool?.onMouseUp(e, ctx);
+
+  handlePointerUp(e: PointerEvent, ctx: CanvasRenderingContext2D) {
+    this.currentTool?.onPointerUp(e, ctx);
   }
 }

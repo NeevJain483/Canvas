@@ -1,7 +1,9 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
-import { ToolManager, ToolType } from "../script/tools";
+import { ToolManager } from "../script/tools";
+import { ToolType } from "../script/functions";
 import "./index.css";
+
 import ColorBox from "./ColorBox";
 import ToolBox from "./ToolBox";
 import Function from "./function";
@@ -12,7 +14,7 @@ const Draw = () => {
   const toolManagerRef = useRef<ToolManager | null>(null);
   const [activeTool, setActiveTool] = useState<ToolType | undefined>(undefined);
   const [showColor, setShowColor] = useState(false);
-  const [progress, setProgress] = useState(3);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -27,22 +29,23 @@ const Draw = () => {
     const toolManager = new ToolManager(ctx);
     toolManagerRef.current = toolManager;
 
-    const handleMouseDown = (e: MouseEvent) =>
-      toolManager.handleMouseDown(e, ctx);
-    const handleMouseMove = (e: MouseEvent) =>
-      toolManager.handleMouseMove(e, ctx);
-    const handleMouseUp = (e: MouseEvent) => toolManager.handleMouseUp(e, ctx);
+    // Pointer event functions
+    const handlePointerDown = (e: PointerEvent) =>
+      toolManager.handlePointerDown(e, ctx);
+    const handlePointerMove = (e: PointerEvent) =>
+      toolManager.handlePointerMove(e, ctx);
+    const handlePointerUp = (e: PointerEvent) =>
+      toolManager.handlePointerUp(e, ctx);
 
-    canvas.addEventListener("mousedown", handleMouseDown);
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseup", handleMouseUp);
-
-    setProgress(3);
+    // Add listeners
+    canvas.addEventListener("pointerdown", handlePointerDown);
+    canvas.addEventListener("pointermove", handlePointerMove);
+    canvas.addEventListener("pointerup", handlePointerUp);
 
     return () => {
-      canvas.removeEventListener("mousedown", handleMouseDown);
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseup", handleMouseUp);
+      canvas.removeEventListener("pointerdown", handlePointerDown);
+      canvas.removeEventListener("pointermove", handlePointerMove);
+      canvas.removeEventListener("pointerup", handlePointerUp);
     };
   }, []);
 
@@ -53,22 +56,33 @@ const Draw = () => {
     );
   }, [activeTool, progress]);
 
+  useEffect(() => {
+    if (!activeTool) return;
+    const defaultProgress =
+      ((activeTool.size - activeTool.min) / (activeTool.max - activeTool.min)) *
+      100;
+    setProgress(Math.ceil(defaultProgress));
+  }, [activeTool]);
+
   return (
     <div style={{ height: "100vh", overflow: "hidden" }}>
-      {showColor && <ColorBox toolManagerRef={toolManagerRef}></ColorBox>}
+      {showColor && <ColorBox toolManagerRef={toolManagerRef} />}
       <ToolBox
         setActiveTool={setActiveTool}
         setShowColor={setShowColor}
         canvasRef={canvasRef}
         toolManagerRef={toolManagerRef}
       />
-      <Function canvas={canvasRef}></Function>
+      <Function canvas={canvasRef} />
       {activeTool && (
         <Seekbar
           value={progress}
-          onChange={setProgress}
-          max={activeTool?.max}
-          min={activeTool?.min}
+          onChange={(value: number) => {
+            setProgress(value);
+            
+          }}
+          max={activeTool.max}
+          min={activeTool.min}
         />
       )}
       <canvas ref={canvasRef} id="canvas"></canvas>

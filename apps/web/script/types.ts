@@ -1,10 +1,14 @@
 export interface ToolManagerType {
   name: string;
+
+  // Optional configuration
   setColor?(color: string): void;
-  setStockWidth?(width: number): void;
-  onMouseDown(event: MouseEvent, ctx: CanvasRenderingContext2D): void;
-  onMouseMove(event: MouseEvent, ctx: CanvasRenderingContext2D): void;
-  onMouseUp(event: MouseEvent, ctx: CanvasRenderingContext2D): void;
+  setStrokeWidth?(width: number): void;
+
+  // Unified pointer events (mouse, touch, stylus)
+  onPointerDown(event: PointerEvent, ctx: CanvasRenderingContext2D): void;
+  onPointerMove(event: PointerEvent, ctx: CanvasRenderingContext2D): void;
+  onPointerUp(event: PointerEvent, ctx: CanvasRenderingContext2D): void;
 }
 
 type Point = {
