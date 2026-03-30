@@ -1,5 +1,71 @@
-canvas{
+:root {
+  --beforeShape-top: 50px;
+  --beforeShape-left: 52px;
+}
+.loading {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  background-color: white;
+  z-index: 100;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+canvas {
   touch-action: none;
+  border: 1px solid black;
+}
+
+.before-shape {
+  box-sizing: border-box;
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: var(--beforeShape-top);
+  left: var(--beforeShape-left);
+  background-color: #e0e0e0;
+  border: 2px solid grey;
+  border-radius: 50%;
+  z-index: 1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+  touch-action: none;
+}
+.after-shape {
+  box-sizing: border-box;
+  position: absolute;
+  width: 12px;
+  height: 20px;
+  top: calc(var(--beforeShape-top) + 12px);
+  left: calc(var(--beforeShape-left) + 3px);
+  background-color: #e0e0e0;
+  border: 2px solid grey;
+  border-radius: 4px;
+  z-index: -1;
+}
+.show-all-btn {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid grey;
+  background-color: #e0e0e0;
+
+  position: absolute;
+  top: calc(var(--beforeShape-top) + 30px);
+  left: calc(var(--beforeShape-left) - 12px);
+  z-index: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
 .tool-box,
@@ -25,7 +91,7 @@ canvas{
 
 #function-box {
   display: flex;
-  width: 75px;
+  width: 130px;
   padding: 5px;
   position: absolute;
   top: 0;
