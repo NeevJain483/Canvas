@@ -4,30 +4,42 @@ import jwt from "jsonwebtoken";
 
 import { LoginSchema, RegisterSchema } from "@repo/common/schema";
 import { JWT_SECRET } from "@repo/common/config";
+import { prisma } from "@repo/database";
 const AuthRouter = Router();
 
 AuthRouter.post("/register", async (req, res) => {
   const parsedSchema = RegisterSchema.safeParse(req.body);
   if (!parsedSchema.success)
-    return res.json({
+    return res.status(400).json({
       error: parsedSchema.error.message,
     });
-  const data = parsedSchema.data;
+  const inputData = parsedSchema.data;
   try {
     const salt = await bcrypt.genSalt(12);
-    const hashedPass = await bcrypt.hash(data.password, salt);
+    const password_hash = await bcrypt.hash(inputData.password, salt);
 
-    //database entry here
-    // ----------database--------
-
-    return res.json({
-      username: parsedSchema.data.username,
-      email: parsedSchema.data.email,
-      password: hashedPass,
+    await prisma.user.create({
+      data: {
+        username: inputData.username,
+        email: inputData.email,
+        password_hash,
+        first_name: inputData.first_name,
+        last_name: inputData.last_name,
+      },
     });
-  } catch (err) {
-    return res.json({
-      error: err,
+
+    return res.status(201).json({
+      msg: "User is created",
+    });
+  } catch (err: any) {
+    console.error("Register error:", err);
+    if (err.code === "P2002") {
+      return res.status(409).json({
+        error: "Email or username already exists",
+      });
+    }
+    return res.status(500).json({
+      error: "Failed to register user",
     });
   }
 });
