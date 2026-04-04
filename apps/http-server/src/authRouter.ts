@@ -3,14 +3,15 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 import {
+  ForgetPasswordSchema,
   LoginSchema,
   RegisterSchema,
   VerifyEmailSchema,
 } from "@repo/common/schema";
 import { ACCESS_SECRET, REFRESH_SECRET } from "@repo/common/config";
 import { prisma } from "@repo/database";
-import { verifyRefreshToken } from "./middleware";
-import { RequestWithUser } from "./types";
+import { forgetPasswordToken, verifyRefreshToken } from "./middleware";
+import { RequestForForgetPassword, RequestForVerifyEmail } from "./types";
 import { generateVerificationCode, mailVerificationCode } from "./script";
 
 const AuthRouter = Router();
@@ -111,6 +112,103 @@ AuthRouter.post("/login", async (req, res) => {
   }
 });
 
+AuthRouter.post("/forget-password", async (req, res) => {
+  const parsedSchema = ForgetPasswordSchema.safeParse(req.body);
+  if (!parsedSchema.success) {
+    return res.status(400).json({ msg: "Invalid inputs" });
+  }
+
+  const { email } = parsedSchema.data;
+
+  const generatedCode = generateVerificationCode();
+  try {
+    await mailVerificationCode({ to: email }, generatedCode);
+
+    codes[email] = {
+      code: generatedCode,
+      expireIn: Date.now() + 15 * 60 * 1000, // 15 minutes
+    };
+
+    const secret = process.env.FORGET_PASSWORD_SECRET;
+    if (!secret) {
+      return res.status(500).json({ msg: "Internal error" });
+    }
+
+    const token = jwt.sign({ email }, secret, { expiresIn: "20m" });
+
+    res.cookie("draw-app-reset-password", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.json({ msg: "Password reset request sent" });
+  } catch (error) {
+    console.error("Forget password error:", error);
+    return res.status(500).json({ msg: "Internal error" });
+  }
+});
+
+AuthRouter.post(
+  "/reset-password",
+  forgetPasswordToken,
+  async (req: RequestForForgetPassword, res) => {
+    const { newPass, code } = req.body;
+    if (!code) {
+      return res.json({
+        msg: "Provide code",
+      });
+    }
+    if (!newPass) {
+      return res.json({
+        msg: "Provid password",
+      });
+    }
+    if (!req.user)
+      return res.json({
+        msg: "Not Authorized",
+      });
+
+    const email = req.user.email;
+
+    if (!codes[email])
+      return res.json({
+        msg: "Not Autorized",
+      });
+    if (codes[email].code !== parseInt(code)) {
+      console.log(codes[email]);
+      return res.json({
+        msg: "Invalide code",
+      });
+    }
+    if (codes[email].expireIn < Date.now())
+      return res.json({
+        msg: "Code is Expired",
+      });
+
+    try {
+      const salt = await bcrypt.genSalt(12);
+      const password_hash = await bcrypt.hash(newPass, salt);
+      await prisma.user.update({
+        where: {
+          email: email,
+        },
+        data: {
+          password_hash,
+        },
+      });
+      delete codes[email];
+      return res.json({
+        msg: "Success password is changed",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        msg: "Internal Error",
+      });
+    }
+  },
+);
+
 AuthRouter.use(verifyRefreshToken);
 
 AuthRouter.post("/logout", (req, res) => {
@@ -120,7 +218,7 @@ AuthRouter.post("/logout", (req, res) => {
   });
 });
 
-AuthRouter.post("/refresh-token", async (req: RequestWithUser, res) => {
+AuthRouter.post("/refresh-token", async (req: RequestForVerifyEmail, res) => {
   const user = req.user;
   if (!user) {
     return res.status(401).json({ msg: "Unauthorized" });
@@ -152,13 +250,7 @@ AuthRouter.post("/refresh-token", async (req: RequestWithUser, res) => {
   }
 });
 
-AuthRouter.post("/forget-password", (req, res) => {
-  res.json({ msg: "forget-password" });
-});
-
-AuthRouter.post("/reset-password", async (req, res) => {
-  res.json({ msg: "reset-password" });
-});
+AuthRouter.use(verifyRefreshToken);
 
 AuthRouter.post("/verify-email", async (req, res) => {
   const parsedSchema = VerifyEmailSchema.safeParse(req.body);
