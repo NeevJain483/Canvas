@@ -19,5 +19,6 @@ model User{
   password_hash String @db.VarChar(225)
   first_name String? @db.VarChar(50)
   last_name String? @db.VarChar(50)
+  email_verified Boolean @default(false)
   created_At DateTime @default(now())
 }

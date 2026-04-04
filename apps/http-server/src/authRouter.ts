@@ -2,10 +2,20 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { LoginSchema, RegisterSchema } from "@repo/common/schema";
+import {
+  LoginSchema,
+  RegisterSchema,
+  VerifyEmailSchema,
+} from "@repo/common/schema";
 import { ACCESS_SECRET, REFRESH_SECRET } from "@repo/common/config";
 import { prisma } from "@repo/database";
+import { verifyRefreshToken } from "./middleware";
+import { RequestWithUser } from "./types";
+import { generateVerificationCode, mailVerificationCode } from "./script";
+
 const AuthRouter = Router();
+
+const codes: Record<string, { code: number; expireIn: number }> = {};
 
 AuthRouter.post("/register", async (req, res) => {
   const parsedSchema = RegisterSchema.safeParse(req.body);
@@ -72,7 +82,7 @@ AuthRouter.post("/login", async (req, res) => {
       return res.status(500).json({
         msg: "Internal Error",
       });
-      
+
     const access_token = jwt.sign(
       { username: user.username, id: user.id },
       ACCESS_SECRET,
@@ -94,13 +104,14 @@ AuthRouter.post("/login", async (req, res) => {
       msg: "Login successful",
       token: access_token,
     });
-
   } catch (error) {
     return res.status(500).json({
       msg: "Internal Error",
     });
   }
 });
+
+AuthRouter.use(verifyRefreshToken);
 
 AuthRouter.post("/logout", (req, res) => {
   res.clearCookie("draw-cookie");
@@ -109,18 +120,98 @@ AuthRouter.post("/logout", (req, res) => {
   });
 });
 
-AuthRouter.post("/refresh-token", (req, res) => {
-  res.json({ msg: "refresh-token" });
+AuthRouter.post("/refresh-token", async (req: RequestWithUser, res) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!dbUser) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    if (!ACCESS_SECRET) {
+      return res.status(500).json({ msg: "Internal Error" });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      ACCESS_SECRET,
+      { expiresIn: "15m" },
+    );
+
+    return res.status(200).json({ token, msg: "Access token refreshed" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: "Internal Error" });
+  }
 });
+
 AuthRouter.post("/forget-password", (req, res) => {
   res.json({ msg: "forget-password" });
 });
-AuthRouter.post("/reset-password", (req, res) => {
+
+AuthRouter.post("/reset-password", async (req, res) => {
   res.json({ msg: "reset-password" });
 });
-AuthRouter.get("/verify-email", (req, res) => {
-  res.json({ msg: "verify-email" });
+
+AuthRouter.post("/verify-email", async (req, res) => {
+  const parsedSchema = VerifyEmailSchema.safeParse(req.body);
+
+  if (!parsedSchema.success) {
+    return res.status(400).json({ error: parsedSchema.error.message });
+  }
+
+  const { email, code } = parsedSchema.data;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  // If no code provided, generate and send one
+  if (!code) {
+    const generatedCode = generateVerificationCode();
+
+    try {
+      await mailVerificationCode({ to: email }, generatedCode);
+
+      codes[email] = {
+        code: generatedCode,
+        expireIn: Date.now() + 20 * 60 * 1000, // 20 minutes
+      };
+
+      return res.status(200).json({ msg: "Verification code sent" });
+    } catch (error: any) {
+      console.error("Mail error:", error.message);
+      return res.status(500).json({ error: "Internal Error" });
+    }
+  }
+
+  const record = codes[email];
+  if (!record) return res.status(400).json({ error: "No code found" });
+  if (Date.now() > record.expireIn)
+    return res.status(400).json({ error: "Code expired" });
+  if (Number(code) !== record.code)
+    return res.status(400).json({ error: "Invalid code" });
+
+  try {
+    await prisma.user.update({
+      where: { email },
+      data: { email_verified: true },
+    });
+    delete codes[email];
+    return res.json({ msg: "Email verified successfully!" });
+  } catch (error: any) {
+    console.error("DB error:", error.message);
+    return res.status(500).json({ error: "Internal Error" });
+  }
 });
+
 AuthRouter.post("/oauth/callback", (req, res) => {
   res.json({ msg: "callback" });
 });

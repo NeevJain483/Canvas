@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 import express from "express";
+import cookieParser from "cookie-parser"
 
 import AuthRouter from "./authRouter";
 import { prisma } from "@repo/database";
@@ -11,6 +12,7 @@ const PORT = 4002;
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/v1/auth", AuthRouter);
 

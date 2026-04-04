@@ -15,3 +15,8 @@ export const LoginSchema = z.object({
   email: z.email().transform((val) => val.toLowerCase().trim()),
   password: z.string().trim().min(8).max(50),
 });
+
+export const VerifyEmailSchema = z.object({
+  email: z.email().transform((val) => val.toLowerCase().trim()),
+  code: z.string().length(6).optional(),
+});
