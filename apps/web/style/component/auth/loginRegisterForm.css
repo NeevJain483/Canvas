@@ -1,0 +1,6 @@
+.login-form-forget-password-button-container > button{
+    border: none;
+    background-color: rgba(0, 0, 0, 0);
+    color: rgb(51, 133, 191);
+    font-size: 12px;
+}

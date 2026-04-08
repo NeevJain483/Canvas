@@ -1,0 +1,41 @@
+.auth-form-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-form-container > form {
+  border: 3px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 400px;
+  height: 300px;
+  gap: 20px;
+}
+
+.auth-form-container > form > input {
+  width: 80%;
+  border: 3px solid black;
+  height: 36px;
+  padding: 0 0 0 5px;
+  outline: none;
+}
+
+.auth-form-submit-button-container,
+.login-form-forget-password-button-container {
+  width: 80%;
+  display: flex;
+  justify-content: end;
+}
+
+.auth-form-submit-button-container > button{
+    width: 75px;
+    border: 3px solid black;
+    font-size: 14px;
+    height: 36px;
+    background-color: rgba(0, 0, 0, 0);
+}

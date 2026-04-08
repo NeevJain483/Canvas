@@ -121,6 +121,19 @@ AuthRouter.post("/forget-password", async (req, res) => {
   const { email } = parsedSchema.data;
 
   const generatedCode = generateVerificationCode();
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user)
+      return res.status(404).json({
+        msg: "You are not part of our system",
+      });
+  } catch (error) {
+    return res.status(404).json({
+      msg: "Your are not part of our system",
+    });
+  }
+
   try {
     await mailVerificationCode({ to: email }, generatedCode);
 
@@ -142,7 +155,7 @@ AuthRouter.post("/forget-password", async (req, res) => {
       sameSite: "strict",
     });
 
-    return res.json({ msg: "Password reset request sent" });
+    return res.status(200).json({ msg: "Password reset request sent" });
   } catch (error) {
     console.error("Forget password error:", error);
     return res.status(500).json({ msg: "Internal error" });
@@ -154,56 +167,62 @@ AuthRouter.post(
   forgetPasswordToken,
   async (req: RequestForForgetPassword, res) => {
     const { newPass, code } = req.body;
+
     if (!code) {
-      return res.json({
-        msg: "Provide code",
+      return res.status(400).json({
+        msg: "Reset code is required",
       });
     }
+
     if (!newPass) {
-      return res.json({
-        msg: "Provid password",
+      return res.status(400).json({
+        msg: "New password is required",
       });
     }
-    if (!req.user)
-      return res.json({
-        msg: "Not Authorized",
+
+    if (!req.user) {
+      return res.status(401).json({
+        msg: "Unauthorized request",
       });
+    }
 
     const email = req.user.email;
 
-    if (!codes[email])
-      return res.json({
-        msg: "Not Autorized",
-      });
-    if (codes[email].code !== parseInt(code)) {
-      console.log(codes[email]);
-      return res.json({
-        msg: "Invalide code",
+    if (!codes[email]) {
+      return res.status(401).json({
+        msg: "Unauthorized or invalid reset request",
       });
     }
-    if (codes[email].expireIn < Date.now())
-      return res.json({
-        msg: "Code is Expired",
+
+    if (codes[email].code !== parseInt(code)) {
+      return res.status(400).json({
+        msg: "Invalid reset code",
       });
+    }
+
+    if (codes[email].expireIn < Date.now()) {
+      return res.status(410).json({
+        msg: "Reset code has expired",
+      });
+    }
 
     try {
       const salt = await bcrypt.genSalt(12);
       const password_hash = await bcrypt.hash(newPass, salt);
+
       await prisma.user.update({
-        where: {
-          email: email,
-        },
-        data: {
-          password_hash,
-        },
+        where: { email },
+        data: { password_hash },
       });
+
       delete codes[email];
-      return res.json({
-        msg: "Success password is changed",
+
+      return res.status(200).json({
+        msg: "Password has been successfully changed",
       });
     } catch (error) {
       return res.status(500).json({
-        msg: "Internal Error",
+        msg: "Internal server error",
       });
     }
   },

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 import { REFRESH_SECRET } from "@repo/common/config";
 import {
