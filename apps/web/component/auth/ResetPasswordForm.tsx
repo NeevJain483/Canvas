@@ -6,12 +6,15 @@ import { ResetPasswordSchema } from "@repo/common/schema";
 
 import "../../style/component/auth/index.css"
 import "../../style/component/auth/resetPassword.css" 
+import { useRouter } from "next/navigation";
+import { FRONTEND_URL } from "@repo/common/config";
 
 const ResetPasswordForm = () => {
   const [data, setData] = React.useState<{ newPass: string; code: string }>({
     newPass: "",
     code: "",
   });
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,7 +33,7 @@ const ResetPasswordForm = () => {
         data,
         { withCredentials: true },
       );
-      console.log(response);
+      router.push(`${FRONTEND_URL}/auth/login`)      
     } catch (error: any) {
       console.log(error.message);
     }

@@ -12,13 +12,63 @@ datasource db {
   provider = "postgresql"
 }
 
-model User{
-  id String @id @default(uuid()) @db.Uuid
-  email String @unique @db.VarChar(225)
-  username String @unique @db.VarChar(100)
-  password_hash String @db.VarChar(225)
-  first_name String? @db.VarChar(50)
-  last_name String? @db.VarChar(50)
-  email_verified Boolean @default(false)
-  created_At DateTime @default(now())
+enum SubscriptionLevel {
+  free
+  pro
+  enterprise
+}
+
+enum ColorMode {
+  RGB
+  CMYK
+  Grayscale
+}
+
+model User {
+  id                 String            @id @default(uuid()) @db.Uuid
+  email              String            @unique @db.VarChar(255)
+  username           String            @unique @db.VarChar(100)
+  password_hash      String            @db.VarChar(255)
+  first_name         String?           @db.VarChar(50)
+  last_name          String?           @db.VarChar(50)
+  profile_pic_url    String?
+  bio                String?
+  subscription_level SubscriptionLevel @default(free)
+  subscription_id    String?           @db.VarChar(255)
+  email_verified     Boolean           @default(false)
+  is_active          Boolean           @default(true)
+  is_banned          Boolean           @default(false)
+  ban_reason         String?
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
+  last_login         DateTime?
+
+  projects Project[]
+
+  @@index([email], name: "idx_email")
+  @@index([username], name: "idx_username")
+}
+
+model Project {
+  id               String    @id @default(uuid()) @db.Uuid
+  owner_id         String    @db.Uuid
+  owner            User      @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  title            String    @db.VarChar(255)
+  description      String?
+  thumbnail_url    String?
+  is_public        Boolean   @default(false)
+  width            Int       @default(1920)
+  height           Int       @default(1080)
+  dpi              Int       @default(72)
+  color_mode       ColorMode
+  background_color String?   @db.VarChar(7)
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  last_edited_at   DateTime?
+  is_archived      Boolean   @default(false)
+  view_count       Int       @default(0)
+
+  @@index([owner_id], name: "idx_owner_id")
+  @@index([is_public], name: "idx_is_public")
+  @@index([title, description], name: "idx_title_desc")
 }

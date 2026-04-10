@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ForgetPasswordSchema } from "@repo/common/schema";
 import { useRouter } from "next/navigation";
 
-import "../../style/component/auth/index.css"
+import "../../style/component/auth/index.css";
 import "../../style/component/auth/forgetPassword.css";
 
 const ForgetPasswordForm = () => {

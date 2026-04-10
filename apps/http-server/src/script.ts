@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-import Mail from "nodemailer/lib/mailer";
 
 export async function mailVerificationCode({to}:{to:string}, code: number) {
   const email_id = process.env.EMAIL_ID;

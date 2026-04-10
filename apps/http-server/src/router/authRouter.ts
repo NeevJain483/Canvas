@@ -8,11 +8,14 @@ import {
   RegisterSchema,
   VerifyEmailSchema,
 } from "@repo/common/schema";
-import { ACCESS_SECRET, REFRESH_SECRET } from "@repo/common/config";
-import { prisma } from "@repo/database";
-import { forgetPasswordToken, verifyRefreshToken } from "./middleware";
-import { RequestForForgetPassword, RequestForVerifyEmail } from "./types";
-import { generateVerificationCode, mailVerificationCode } from "./script";
+import { ACCESS_SECRET, REFRESH_SECRET,db } from "@repo/common/config";
+import {
+  forgetPasswordToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+} from "../middleware";
+import { RequestForForgetPassword, RequestWithUser } from "../types";
+import { generateVerificationCode, mailVerificationCode } from "../script";
 
 const AuthRouter = Router();
 
@@ -29,7 +32,7 @@ AuthRouter.post("/register", async (req, res) => {
     const salt = await bcrypt.genSalt(12);
     const password_hash = await bcrypt.hash(inputData.password, salt);
 
-    await prisma.user.create({
+    await db.user.create({
       data: {
         username: inputData.username,
         email: inputData.email,
@@ -63,7 +66,7 @@ AuthRouter.post("/login", async (req, res) => {
     });
   const data = parsedSchema.data;
   try {
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: {
         email: data.email,
       },
@@ -85,7 +88,7 @@ AuthRouter.post("/login", async (req, res) => {
       });
 
     const access_token = jwt.sign(
-      { username: user.username, id: user.id },
+      { username: user.username, id: user.id, email: user.email },
       ACCESS_SECRET,
       { expiresIn: "1h" },
     );
@@ -123,7 +126,7 @@ AuthRouter.post("/forget-password", async (req, res) => {
   const generatedCode = generateVerificationCode();
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await db.user.findUnique({ where: { email } });
     if (!user)
       return res.status(404).json({
         msg: "You are not part of our system",
@@ -210,7 +213,7 @@ AuthRouter.post(
       const salt = await bcrypt.genSalt(12);
       const password_hash = await bcrypt.hash(newPass, salt);
 
-      await prisma.user.update({
+      await db.user.update({
         where: { email },
         data: { password_hash },
       });
@@ -237,14 +240,14 @@ AuthRouter.post("/logout", (req, res) => {
   });
 });
 
-AuthRouter.post("/refresh-token", async (req: RequestForVerifyEmail, res) => {
+AuthRouter.post("/refresh-token", async (req: RequestWithUser, res) => {
   const user = req.user;
   if (!user) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
 
   try {
-    const dbUser = await prisma.user.findUnique({
+    const dbUser = await db.user.findUnique({
       where: { id: user.id },
     });
 
@@ -257,7 +260,7 @@ AuthRouter.post("/refresh-token", async (req: RequestForVerifyEmail, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, username: user.username },
+      { id: user.id, username: user.username, email: dbUser.email },
       ACCESS_SECRET,
       { expiresIn: "15m" },
     );
@@ -269,7 +272,7 @@ AuthRouter.post("/refresh-token", async (req: RequestForVerifyEmail, res) => {
   }
 });
 
-AuthRouter.use(verifyRefreshToken);
+AuthRouter.use(verifyAccessToken);
 
 AuthRouter.post("/verify-email", async (req, res) => {
   const parsedSchema = VerifyEmailSchema.safeParse(req.body);
@@ -284,7 +287,6 @@ AuthRouter.post("/verify-email", async (req, res) => {
     return res.status(400).json({ error: "Email is required" });
   }
 
-  // If no code provided, generate and send one
   if (!code) {
     const generatedCode = generateVerificationCode();
 
@@ -311,7 +313,7 @@ AuthRouter.post("/verify-email", async (req, res) => {
     return res.status(400).json({ error: "Invalid code" });
 
   try {
-    await prisma.user.update({
+    await db.user.update({
       where: { email },
       data: { email_verified: true },
     });

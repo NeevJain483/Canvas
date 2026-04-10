@@ -6,9 +6,10 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-import AuthRouter from "./authRouter";
-import { prisma } from "@repo/database";
-import { FRONTEND_URL } from "@repo/common/config";
+import AuthRouter from "./router/authRouter";
+import UserRouter from "./router/userRouter";
+
+import { db,FRONTEND_URL } from "@repo/common/config";
 
 const PORT = 4002;
 const app = express();
@@ -23,10 +24,11 @@ app.use(
 );
 
 app.use("/api/v1/auth", AuthRouter);
+app.use("/api/v1/users", UserRouter);
 
 app.get("/api/v1/ping", async (req, res) => {
   try {
-    await prisma.user.findMany({});
+    await db.user.findMany({});
     return res.json({
       msg: "pong",
       database: "OK",

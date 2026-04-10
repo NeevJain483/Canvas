@@ -26,6 +26,6 @@ export const ForgetPasswordSchema = z.object({
 });
 
 export const ResetPasswordSchema = z.object({
-  password: z.string().max(225).min(8),
+  newPass: z.string().max(225).min(8),
   code: z.string().length(6)
 });
