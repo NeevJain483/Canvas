@@ -1,42 +1,36 @@
 "use client";
-import axios from "axios";
 import React from "react";
-import { BACKEND_URL } from "../../script/config";
-import { ResetPasswordSchema } from "@repo/common/schema";
-
-import "../../style/component/auth/index.css"
-import "../../style/component/auth/resetPassword.css" 
 import { useRouter } from "next/navigation";
-import { FRONTEND_URL } from "@repo/common/config";
+import { useShallow } from "zustand/shallow";
+
+import "../../style/component/auth/index.css";
+import "../../style/component/auth/resetPassword.css";
+import { useAuthStore } from "../../lib/store/authStore";
+import Toast from "../common/Toast";
+import Loading from "../common/Loading";
 
 const ResetPasswordForm = () => {
-  const [data, setData] = React.useState<{ newPass: string; code: string }>({
-    newPass: "",
-    code: "",
-  });
+  const [data, setData] = React.useState<{ newPassword: string; code: string }>(
+    {
+      newPassword: "",
+      code: "",
+    },
+  );
+
+  const { isLoading, resetPassword, success, clearMessage } = useAuthStore(
+    useShallow((state) => ({
+      isLoading: state.isLoading,
+      resetPassword: state.resetPassword,
+      success: state.success,
+      clearMessage: state.clearMessage,
+    })),
+  );
+
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const parsedData = ResetPasswordSchema.safeParse(data);
-    if (!parsedData.success) {
-      alert(parsedData.error);
-      setData({
-        newPass: "",
-        code: "",
-      });
-      return;
-    }
-    try {
-      const response = await axios.post(
-        `${BACKEND_URL}/auth/reset-password`,
-        data,
-        { withCredentials: true },
-      );
-      router.push(`${FRONTEND_URL}/auth/login`)      
-    } catch (error: any) {
-      console.log(error.message);
-    }
+    resetPassword(data.newPassword, data.code);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,16 +39,27 @@ const ResetPasswordForm = () => {
     setData((el) => ({ ...el, [name]: value }));
   };
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (success && success.status === 200) {
+    setTimeout(() => {
+      clearMessage();
+      router.push("/auth/login");
+    }, 2000);
+  }
+
   return (
     <>
       <div className="auth-form-container reset-password-form-container">
         <form onSubmit={handleSubmit}>
           <h1>New Password</h1>
           <input
-            type="text"
+            type="password"
             placeholder="New Password"
-            name="newPass"
-            value={data.newPass}
+            name="newPassword"
+            value={data.newPassword}
             onChange={handleChange}
           />
           <input
@@ -65,9 +70,10 @@ const ResetPasswordForm = () => {
             onChange={handleChange}
           />
           <div className="auth-form-submit-button-container reset-password-form-submit-button-container">
-            <button>Submit</button>
+            <button className="sm-btn">Submit</button>
           </div>
         </form>
+        <Toast />
       </div>
     </>
   );

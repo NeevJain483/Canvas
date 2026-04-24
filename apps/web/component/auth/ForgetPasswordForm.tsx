@@ -1,16 +1,26 @@
 "use client";
-import axios from "axios";
-import { BACKEND_URL, FRONTEND_URL } from "../../script/config";
 import { useState } from "react";
-import { ForgetPasswordSchema } from "@repo/common/schema";
 import { useRouter } from "next/navigation";
+import { useShallow } from "zustand/shallow";
 
+import Loading from "../common/Loading";
 import "../../style/component/auth/index.css";
 import "../../style/component/auth/forgetPassword.css";
+import { useAuthStore } from "../../lib/store/authStore";
+import Toast from "../common/Toast";
 
 const ForgetPasswordForm = () => {
   const [email, setEmail] = useState("");
   const router = useRouter();
+
+  const { isLoading, forgetPassword, success, clearMessage } = useAuthStore(
+    useShallow((state) => ({
+      isLoading: state.isLoading,
+      forgetPassword: state.forgetPassword,
+      success: state.success,
+      clearMessage: state.clearMessage,
+    })),
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -19,25 +29,20 @@ const ForgetPasswordForm = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const parsedData = ForgetPasswordSchema.safeParse({ email });
-    if (!parsedData.success) {
-      alert(parsedData.error);
-      setEmail("");
-      return;
-    }
-    try {
-      const response = await axios.post(
-        `${BACKEND_URL}/auth/forget-password`,
-        { email },
-        { withCredentials: true },
-      );
-      if (response.status === 200) {
-        router.push(`${FRONTEND_URL}/auth/reset-password`);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    forgetPassword(email);
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (success && success.status === 200) {
+    setTimeout(() => {
+      clearMessage()
+      router.push(`/auth/reset-password`);
+    }, 2000);
+  }
+
   return (
     <div className="auth-form-container forget-password-form-container">
       <form onSubmit={handleSubmit}>
@@ -50,9 +55,12 @@ const ForgetPasswordForm = () => {
           onChange={handleChange}
         />
         <div className="auth-form-submit-button-container forget-password-form-submit-button-container">
-          <button type="submit">Submit</button>
+          <button className="sm-btn" type="submit">
+            Submit
+          </button>
         </div>
       </form>
+      <Toast />
     </div>
   );
 };

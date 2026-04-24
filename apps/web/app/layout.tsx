@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import "./globals.css"
+import { Suspense } from "react";
+import "../style/global.css";
+import RouterChangeListner from "../component/RouterChangeListner";
+import Loading from "../component/common/Loading";
 
 export const metadata: Metadata = {
-  title: "Create",
+  title: "Canvas",
   description: "Create beautifull drawings",
 };
 
@@ -13,7 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body style={{ height: "100vh" }}>
+        <Suspense fallback={<Loading />}>
+          <RouterChangeListner />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }

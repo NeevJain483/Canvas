@@ -1,6 +1,6 @@
 import React from "react";
 import ColorButton from "../ui/ColorButton";
-import { ToolManager } from "../script/tools";
+import { ToolManager } from "../lib/tools";
 
 type ColorBoxType = {
   toolManagerRef: React.RefObject<ToolManager | null>;

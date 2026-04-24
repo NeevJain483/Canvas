@@ -10,32 +10,35 @@ import {
   CustomJwtPayload,
   RequestForForgetPassword,
   RequestWithUser,
-} from "./types";
+} from "../types";
 
-export const verifyAccessToken = async (
+export const verifyAccessToken = (
   req: RequestWithUser,
   res: Response,
   next: NextFunction,
 ) => {
   if (!ACCESS_SECRET) {
-    return res.status(500).json({ msg: "Internal Server Error" });
+    res.status(500).json({ msg: "Internal Server Error" });
+    return;
   }
 
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(401).json({ msg: "Authorization header missing" });
+    res.status(401).json({ msg: "Authorization header missing" });
+    return;
   }
 
   const token = authHeader.split(" ")[1];
   if (!token) {
-    return res.status(401).json({ msg: "Token missing" });
+    res.status(401).json({ msg: "Token missing" });
+    return;
   }
 
   try {
     const decoded = jwt.verify(token, ACCESS_SECRET) as CustomJwtPayload;
-    console.log(decoded)
     if (!decoded.email) {
-      return res.status(403).json({ msg: "Invalid token payload" });
+      res.status(403).json({ msg: "Invalid token payload" });
+      return;
     }
 
     req.user = {
@@ -46,16 +49,16 @@ export const verifyAccessToken = async (
 
     next();
   } catch (error) {
-    return res.status(401).json({ msg: "Invalid or expired token" });
+    res.status(401).json({ msg: "Invalid or expired token" });
   }
 };
 
 
-export const verifyRefreshToken = async (
+export const verifyRefreshToken = (
   req: RequestWithUser,
   res: Response,
   next: NextFunction,
-): Promise<void> => {
+) => {
   const refresh_token = req.cookies["draw-cookie"];
 
   if (!refresh_token) {
@@ -91,25 +94,28 @@ export const forgetPasswordToken = (
 ) => {
   const token = req.cookies["draw-app-reset-password"];
   if (!token) {
-    return res.status(401).json({ msg: "Not Authorized" });
+    res.status(401).json({ msg: "Not Authorized" });
+    return;
   }
 
   const secret = FORGET_PASSWORD_SECRET;
   if (!secret) {
-    return res.status(500).json({ msg: "Internal Server Error" });
+    res.status(500).json({ msg: "Internal Server Error" });
+    return;
   }
 
   try {
     const verify = jwt.verify(token, secret) as CustomJwtPayload;
 
     if (!verify.email) {
-      return res.status(401).json({ msg: "Not Authorized" });
+      res.status(401).json({ msg: "Not Authorized" });
+      return;
     }
     req.user = {
       email: verify.email,
     };
     next();
   } catch (error) {
-    return res.status(401).json({ msg: "Not Authorized" });
+    res.status(401).json({ msg: "Not Authorized" });
   }
 };

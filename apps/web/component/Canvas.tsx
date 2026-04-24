@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
-import { ToolManager } from "../script/tools";
-import { ToolType } from "../script/functions";
+import { ToolManager } from "../lib/tools";
+import { ToolType } from "../lib/functions";
 import { FaPlus } from "react-icons/fa";
 import "./index.css";
 

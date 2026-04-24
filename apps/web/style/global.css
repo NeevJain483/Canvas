@@ -1,3 +1,47 @@
+* {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --black: rgba(0, 0, 0, 1);
+  --white: rgba(0, 0, 0, 0);
+}
+
+.dark {
+  --black: rgba(0, 0, 0, 0);
+}
+
+.sm-btn {
+  width: 75px;
+  border: 3px solid var(--black);
+  font-size: 14px;
+  height: 36px;
+  background-color: var(--white);
+  transition: all ease-in-out 0.2s;
+}
+
+.sm-btn:hover {
+  background-color: rgba(235, 235, 235, 1);
+}
+
+.sm-btn:active {
+  background-color: rgba(215, 215, 215, 1);
+}
+
 :root {
   --beforeShape-top: 50px;
   --beforeShape-left: 52px;

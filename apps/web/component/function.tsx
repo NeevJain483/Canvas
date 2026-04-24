@@ -1,7 +1,6 @@
 import React, { RefObject } from "react";
-import { onClickRedoState, onClickUndoState } from "../script/functions";
+import { onClickRedoState, onClickUndoState } from "../lib/functions";
 import { IoIosUndo, IoIosRedo } from "react-icons/io";
-import { IoSave } from "react-icons/io5";
 import { MdSaveAs } from "react-icons/md";
 type FunctionType = {
   canvasRef: RefObject<HTMLCanvasElement | null>;

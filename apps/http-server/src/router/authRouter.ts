@@ -1,332 +1,195 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
 import {
-  ForgetPasswordSchema,
-  LoginSchema,
   RegisterSchema,
+  LoginSchema,
+  ForgetPasswordSchema,
   VerifyEmailSchema,
 } from "@repo/common/schema";
-import { ACCESS_SECRET, REFRESH_SECRET,db } from "@repo/common/config";
+import { db } from "@repo/common/config";
 import {
   forgetPasswordToken,
   verifyAccessToken,
   verifyRefreshToken,
-} from "../middleware";
+} from "../middleware/verifyToken";
 import { RequestForForgetPassword, RequestWithUser } from "../types";
 import { generateVerificationCode, mailVerificationCode } from "../script";
+import { asyncHandler } from "../middleware/asyncHandler";
+import { formatUserResponse, generateTokensAndSetCookie } from "../utils/auth";
 
 const AuthRouter = Router();
-
 const codes: Record<string, { code: number; expireIn: number }> = {};
 
-AuthRouter.post("/register", async (req, res) => {
-  const parsedSchema = RegisterSchema.safeParse(req.body);
-  if (!parsedSchema.success)
-    return res.status(400).json({
-      msg: parsedSchema.error.message,
-    });
-  const inputData = parsedSchema.data;
-  try {
+// --- REGISTER ---
+AuthRouter.post(
+  "/register",
+  asyncHandler(async (req, res) => {
+    const parsed = RegisterSchema.safeParse(req.body);
+    if (!parsed.success)
+      return res.status(400).json({ message: "Invalid registration data." });
+
+    const { username, email, password, first_name, last_name } = parsed.data;
+
     const salt = await bcrypt.genSalt(12);
-    const password_hash = await bcrypt.hash(inputData.password, salt);
+    const password_hash = await bcrypt.hash(password, salt);
 
-    await db.user.create({
-      data: {
-        username: inputData.username,
-        email: inputData.email,
-        password_hash,
-        first_name: inputData.first_name,
-        last_name: inputData.last_name,
-      },
-    });
-
-    return res.status(201).json({
-      msg: "User is created",
-    });
-  } catch (err: any) {
-    // console.error("Register error:", err);
-    if (err.code === "P2002") {
-      return res.status(409).json({
-        msg: "Email or username already exists",
+    try {
+      const user = await db.user.create({
+        data: { username, email, password_hash, first_name, last_name },
       });
+
+      const { accessToken, refreshToken } = generateTokensAndSetCookie(
+        res,
+        user,
+      );
+
+      return res.status(201).json({
+        message: "Account created successfully.",
+        user: formatUserResponse(user),
+        accessToken,
+        refreshToken,
+        expiresIn: 900,
+      });
+    } catch (err: any) {
+      if (err.code === "P2002")
+        return res
+          .status(409)
+          .json({ message: "Username or email already exists." });
+      throw err;
     }
-    return res.status(500).json({
-      msg: "Failed to register user",
-    });
-  }
-});
+  }),
+);
 
-AuthRouter.post("/login", async (req, res) => {
-  const parsedSchema = LoginSchema.safeParse(req.body);
-  if (!parsedSchema.success)
-    return res.status(400).json({
-      msg: parsedSchema.error.message,
-    });
-  const data = parsedSchema.data;
-  try {
-    const user = await db.user.findUnique({
-      where: {
-        email: data.email,
-      },
-    });
-    if (!user)
-      return res.status(404).json({
-        msg: "Create Account first",
-      });
+// --- LOGIN ---
+AuthRouter.post(
+  "/login",
+  asyncHandler(async (req, res) => {
+    const parsed = LoginSchema.safeParse(req.body);
+    if (!parsed.success)
+      return res.status(400).json({ message: "Invalid input format." });
 
-    const success = await bcrypt.compare(data.password, user.password_hash);
-    if (!success)
-      return res.status(401).json({
-        msg: "wrong password",
-      });
+    const { email, password } = parsed.data;
+    const user = await db.user.findUnique({ where: { email } });
 
-    if (!ACCESS_SECRET || !REFRESH_SECRET)
-      return res.status(500).json({
-        msg: "Internal Error",
-      });
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      return res.status(401).json({ message: "Invalid email or password." });
+    }
 
-    const access_token = jwt.sign(
-      { username: user.username, id: user.id, email: user.email },
-      ACCESS_SECRET,
-      { expiresIn: "1h" },
-    );
-    const refresh_token = jwt.sign(
-      { username: user.username, id: user.id },
-      REFRESH_SECRET,
-      { expiresIn: "7d" },
-    );
-
-    res.cookie("draw-cookie", refresh_token, {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      secure: process.env.NODE_ENV === "production",
-    });
+    const { accessToken, refreshToken } = generateTokensAndSetCookie(res, user);
 
     return res.status(200).json({
-      msg: "Login successful",
-      token: access_token,
+      message: "Login successful.",
+      user: formatUserResponse(user),
+      accessToken,
+      refreshToken,
+      expiresIn: 900,
     });
-  } catch (error) {
-    return res.status(500).json({
-      msg: "Internal Error",
-    });
-  }
-});
+  }),
+);
 
-AuthRouter.post("/forget-password", async (req, res) => {
-  const parsedSchema = ForgetPasswordSchema.safeParse(req.body);
-  if (!parsedSchema.success) {
-    return res.status(400).json({ msg: "Invalid inputs" });
-  }
+// --- FORGET PASSWORD ---
+AuthRouter.post(
+  "/forget-password",
+  asyncHandler(async (req, res) => {
+    const parsed = ForgetPasswordSchema.safeParse(req.body);
+    if (!parsed.success)
+      return res.status(400).json({ message: "Valid email is required." });
 
-  const { email } = parsedSchema.data;
-
-  const generatedCode = generateVerificationCode();
-
-  try {
+    const { email } = parsed.data;
     const user = await db.user.findUnique({ where: { email } });
-    if (!user)
-      return res.status(404).json({
-        msg: "You are not part of our system",
-      });
-  } catch (error) {
-    return res.status(404).json({
-      msg: "Your are not part of our system",
-    });
-  }
+    if (!user) return res.status(404).json({ message: "Account not found." });
 
-  try {
-    await mailVerificationCode({ to: email }, generatedCode);
+    const code = generateVerificationCode();
+    await mailVerificationCode({ to: email }, code);
 
-    codes[email] = {
-      code: generatedCode,
-      expireIn: Date.now() + 15 * 60 * 1000, // 15 minutes
-    };
+    codes[email] = { code, expireIn: Date.now() + 20 * 60 * 1000 };
 
     const secret = process.env.FORGET_PASSWORD_SECRET;
-    if (!secret) {
-      return res.status(500).json({ msg: "Internal error" });
-    }
-
-    const token = jwt.sign({ email }, secret, { expiresIn: "20m" });
+    const token = jwt.sign({ email }, secret!, { expiresIn: "20m" });
 
     res.cookie("draw-app-reset-password", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
+    return res
+      .status(200)
+      .json({ message: "Verification code sent to your email." });
+  }),
+);
 
-    return res.status(200).json({ msg: "Password reset request sent" });
-  } catch (error) {
-    console.error("Forget password error:", error);
-    return res.status(500).json({ msg: "Internal error" });
-  }
-});
-
+// --- RESET PASSWORD ---
 AuthRouter.post(
   "/reset-password",
   forgetPasswordToken,
-  async (req: RequestForForgetPassword, res) => {
-    const { newPass, code } = req.body;
+  asyncHandler(async (req: RequestForForgetPassword, res) => {
+    const { newPassword, code } = req.body;
+    const email = req.user?.email;
 
-    if (!code) {
-      return res.status(400).json({
-        msg: "Reset code is required",
-      });
+    if (!email || !codes[email] || codes[email].code !== parseInt(code) || code[email].expireIn < Date.now()) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired verification code." });
     }
 
-    if (!newPass) {
-      return res.status(400).json({
-        msg: "New password is required",
-      });
-    }
+    const salt = await bcrypt.genSalt(12);
+    const password_hash = await bcrypt.hash(newPassword, salt);
 
-    if (!req.user) {
-      return res.status(401).json({
-        msg: "Unauthorized request",
-      });
-    }
+    await db.user.update({ where: { email }, data: { password_hash } });
+    delete codes[email];
 
-    const email = req.user.email;
-
-    if (!codes[email]) {
-      return res.status(401).json({
-        msg: "Unauthorized or invalid reset request",
-      });
-    }
-
-    if (codes[email].code !== parseInt(code)) {
-      return res.status(400).json({
-        msg: "Invalid reset code",
-      });
-    }
-
-    if (codes[email].expireIn < Date.now()) {
-      return res.status(410).json({
-        msg: "Reset code has expired",
-      });
-    }
-
-    try {
-      const salt = await bcrypt.genSalt(12);
-      const password_hash = await bcrypt.hash(newPass, salt);
-
-      await db.user.update({
-        where: { email },
-        data: { password_hash },
-      });
-
-      delete codes[email];
-
-      return res.status(200).json({
-        msg: "Password has been successfully changed",
-      });
-    } catch (error) {
-      return res.status(500).json({
-        msg: "Internal server error",
-      });
-    }
-  },
+    return res.status(200).json({ message: "Password successfully updated." });
+  }),
 );
 
-AuthRouter.use(verifyRefreshToken);
+// --- VERIFY EMAIL ---
+AuthRouter.post(
+  "/verify-email",
+  verifyAccessToken,
+  asyncHandler(async (req, res) => {
+    const { email, code } = VerifyEmailSchema.parse(req.body);
 
-AuthRouter.post("/logout", (req, res) => {
-  res.clearCookie("draw-cookie");
-  return res.status(200).json({
-    msg: "Logged out successfully",
-  });
-});
-
-AuthRouter.post("/refresh-token", async (req: RequestWithUser, res) => {
-  const user = req.user;
-  if (!user) {
-    return res.status(401).json({ msg: "Unauthorized" });
-  }
-
-  try {
-    const dbUser = await db.user.findUnique({
-      where: { id: user.id },
-    });
-
-    if (!dbUser) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-
-    if (!ACCESS_SECRET) {
-      return res.status(500).json({ msg: "Internal Error" });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, username: user.username, email: dbUser.email },
-      ACCESS_SECRET,
-      { expiresIn: "15m" },
-    );
-
-    return res.status(200).json({ token, msg: "Access token refreshed" });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ msg: "Internal Error" });
-  }
-});
-
-AuthRouter.use(verifyAccessToken);
-
-AuthRouter.post("/verify-email", async (req, res) => {
-  const parsedSchema = VerifyEmailSchema.safeParse(req.body);
-
-  if (!parsedSchema.success) {
-    return res.status(400).json({ error: parsedSchema.error.message });
-  }
-
-  const { email, code } = parsedSchema.data;
-
-  if (!email) {
-    return res.status(400).json({ error: "Email is required" });
-  }
-
-  if (!code) {
-    const generatedCode = generateVerificationCode();
-
-    try {
+    if (!code) {
+      const generatedCode = generateVerificationCode();
       await mailVerificationCode({ to: email }, generatedCode);
-
       codes[email] = {
         code: generatedCode,
-        expireIn: Date.now() + 20 * 60 * 1000, // 20 minutes
+        expireIn: Date.now() + 20 * 60 * 1000,
       };
-
-      return res.status(200).json({ msg: "Verification code sent" });
-    } catch (error: any) {
-      console.error("Mail error:", error.message);
-      return res.status(500).json({ error: "Internal Error" });
+      return res.status(200).json({ message: "Verification code sent." });
     }
-  }
 
-  const record = codes[email];
-  if (!record) return res.status(400).json({ error: "No code found" });
-  if (Date.now() > record.expireIn)
-    return res.status(400).json({ error: "Code expired" });
-  if (Number(code) !== record.code)
-    return res.status(400).json({ error: "Invalid code" });
+    const record = codes[email];
+    if (
+      !record ||
+      record.code !== Number(code) ||
+      Date.now() > record.expireIn
+    ) {
+      return res.status(400).json({ message: "Invalid or expired code." });
+    }
 
-  try {
-    await db.user.update({
-      where: { email },
-      data: { email_verified: true },
-    });
+    await db.user.update({ where: { email }, data: { email_verified: true } });
     delete codes[email];
-    return res.json({ msg: "Email verified successfully!" });
-  } catch (error: any) {
-    console.error("DB error:", error.message);
-    return res.status(500).json({ error: "Internal Error" });
-  }
+    return res.status(200).json({ message: "Email verified successfully." });
+  }),
+);
+
+// --- LOGOUT & REFRESH ---
+AuthRouter.post("/logout", (req, res) => {
+  res.clearCookie("draw-cookie");
+  return res.status(200).json({ message: "Logged out successfully." });
 });
 
-AuthRouter.post("/oauth/callback", (req, res) => {
-  res.json({ msg: "callback" });
-});
+AuthRouter.post(
+  "/refresh-token",
+  verifyRefreshToken,
+  asyncHandler(async (req: RequestWithUser, res) => {
+    const user = await db.user.findUnique({ where: { id: req.user?.id } });
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    const { accessToken } = generateTokensAndSetCookie(res, user);
+    return res.status(200).json({ accessToken, message: "Token refreshed." });
+  }),
+);
 
 export default AuthRouter;
