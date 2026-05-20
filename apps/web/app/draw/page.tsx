@@ -1,4 +1,4 @@
-import { DrawingCanvas } from "../../component/canvas/DrawingCanvas";
+import { DrawingCanvas } from "@component/canvas/DrawingCanvas";
 
 const page = () => {
   return <DrawingCanvas />;

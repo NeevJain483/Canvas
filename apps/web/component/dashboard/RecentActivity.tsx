@@ -3,8 +3,8 @@ import React from "react";
 import { IoMdAdd } from "react-icons/io";
 import { useRouter } from "next/navigation";
 
-import "../../style/component/dashboard/recentactivity.css";
-import { useProjectStore } from "../../lib/store/projectStore";
+import "@style/component/dashboard/recentactivity.css";
+import { useProjectStore } from "@lib/store/projectStore";
 import { useShallow } from "zustand/shallow";
 import Card from "../common/Card";
 

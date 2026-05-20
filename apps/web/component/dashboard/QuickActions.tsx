@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter, usePathname } from "next/navigation";
-import "./../../style/component/dashboard/quickactions.css";
+import "@style/component/dashboard/quickactions.css";
 
 const QuickActions = () => {
   const router = useRouter();

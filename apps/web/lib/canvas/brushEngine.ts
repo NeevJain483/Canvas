@@ -1,5 +1,5 @@
-import { BrushSettings, ToolType } from "../store/canvasStore";
-import { ToolLogic } from "./tools";
+import { BrushSettings, ToolType } from "@lib/store/canvasStore";
+import { ToolLogic } from "@lib/canvas/tools";
 
 export class BrushEngine {
   private settings: BrushSettings;

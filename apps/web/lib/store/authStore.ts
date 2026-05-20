@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import apiClient from "../api/client";
+import apiClient from "@lib/api/client";
 import {
   AuthResponseSchema,
   ForgetPasswordSchema,

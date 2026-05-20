@@ -3,7 +3,7 @@ import Image from "next/image";
 import React from "react";
 import { CgProfile } from "react-icons/cg";
 import { IoIosSearch } from "react-icons/io";
-import "./../../../style/component/layout/dashboard/navbar.css";
+import "@style/component/layout/dashboard/navbar.css";
 import { useRouter } from "next/navigation";
 
 const Navbar = () => {

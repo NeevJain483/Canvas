@@ -1,4 +1,4 @@
-import Main from "../../../../component/dashboard/projects/Main";
+import Main from "@component/dashboard/projects/Main";
 
 export default async function Page({
   params,

@@ -1,4 +1,4 @@
-import { ToolType } from "../store/canvasStore";
+import { ToolType } from "@lib/store/canvasStore";
 
 export interface ToolProperty {
   cursor: string;

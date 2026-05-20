@@ -1,8 +1,8 @@
 import { useRef, useEffect } from "react";
-import { useCanvasStore } from "../store/canvasStore";
-import { CanvasEngine } from "../canvas/canvasEngine";
-import { TOOL_PROPERTIES, ToolLogic } from "../canvas/tools";
-import { BrushEngine } from "../canvas/brushEngine";
+import { useCanvasStore } from "@lib/store/canvasStore";
+import { CanvasEngine } from "@lib/canvas/canvasEngine";
+import { TOOL_PROPERTIES, ToolLogic } from "@lib/canvas/tools";
+import { BrushEngine } from "@lib/canvas/brushEngine";
 
 export function useCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);

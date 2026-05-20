@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { CreateProjectType, ProjectDataType, UUID } from "@repo/common/types";
-import apiClient from "../api/client";
+import apiClient from "@lib/api/client";
 import {
   UUIDSchema,
   CreateProjectSchema,

@@ -3,11 +3,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useShallow } from "zustand/shallow";
 
-import Loading from "../common/Loading";
-import "../../style/component/auth/index.css";
-import "../../style/component/auth/forgetPassword.css";
-import { useAuthStore } from "../../lib/store/authStore";
-import Toast from "../common/Toast";
+import Loading from "@component/common/Loading";
+import "@style/component/auth/index.css";
+import "@style/component/auth/forgetPassword.css";
+import { useAuthStore } from "@lib/store/authStore";
+import Toast from "@component/common/Toast";
 
 const ForgetPasswordForm = () => {
   const [email, setEmail] = useState("");

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { MdOutlineExpandMore, MdOutlineDownload } from "react-icons/md";
-import { ExportFormat, ExportUtils } from "../../lib/canvas/export";
+import { ExportFormat, ExportUtils } from "@lib/canvas/export";
 
 
 interface FormatOption {

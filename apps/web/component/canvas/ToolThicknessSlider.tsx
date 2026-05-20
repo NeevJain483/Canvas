@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useCanvasStore } from "../../lib/store/canvasStore";
+import { useCanvasStore } from "@lib/store/canvasStore";
 
 const ToolThicknessSlider = () => {
   const [min, setMin] = useState<number>(2);

@@ -2,12 +2,12 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
-import "../../style/component/auth/index.css";
-import "../../style/component/auth/loginRegisterForm.css";
-import { useAuthStore } from "../../lib/store/authStore";
+import "@style/component/auth/index.css";
+import "@style/component/auth/loginRegisterForm.css";
+import { useAuthStore } from "@lib/store/authStore";
 import { useShallow } from "zustand/shallow";
-import Toast from "../common/Toast";
-import Loading from "../common/Loading";
+import Toast from "@component/common/Toast";
+import Loading from "@component/common/Loading";
 
 type FormType = {
   type: "register" | "login";

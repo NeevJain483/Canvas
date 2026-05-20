@@ -2,13 +2,13 @@
 import React from "react";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 
-import { useCanvasStore } from "../../lib/store/canvasStore";
-import { useCanvas } from "../../lib/hooks/useCanvas";
-import "../../style/component/dashboard/drawingCanvas.css";
-import Toolbar from "./Toolbar";
+import { useCanvasStore } from "@lib/store/canvasStore";
+import { useCanvas } from "@lib/hooks/useCanvas";
+import "@style/component/dashboard/drawingCanvas.css";
+import Toolbar from "@component/canvas/Toolbar";
 import { useShallow } from "zustand/shallow";
-import ToolSetting from "./ToolSetting";
-import More from "./More";
+import ToolSetting from "@component/canvas/ToolSetting";
+import More from "@component/canvas/More";
 
 export const DrawingCanvas = () => {
   const { setFullScreenMode, fullScreenMode } = useCanvasStore(

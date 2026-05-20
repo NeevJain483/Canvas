@@ -4,7 +4,7 @@ import { RiGitRepositoryPrivateLine } from "react-icons/ri";
 import { MdOutlinePublic } from "react-icons/md";
 import { LuRuler } from "react-icons/lu";
 
-import "../../style/component/dashboard/statscard.css";
+import "@style/component/dashboard/statscard.css";
 
 const StatsCard = () => {
   return (

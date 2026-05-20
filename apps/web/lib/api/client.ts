@@ -3,7 +3,7 @@ import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "@lib/store/authStore";
 
 const apiClient = axios.create({
   baseURL:

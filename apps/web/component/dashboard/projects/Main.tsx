@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect } from "react";
-import { useProjectStore } from "../../../lib/store/projectStore";
+import { useProjectStore } from "@lib/store/projectStore";
 import { UUID } from "crypto";
-import { useAuthStore } from "../../../lib/store/authStore";
+import { useAuthStore } from "@lib/store/authStore";
 import { useShallow } from "zustand/shallow";
-import { DrawingCanvas } from "../../canvas/DrawingCanvas";
+import { DrawingCanvas } from "@component/canvas/DrawingCanvas";
 
 type Input = {
   id: string;

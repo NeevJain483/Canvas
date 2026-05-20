@@ -2,12 +2,12 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 
-import Navbar from "../../component/layout/common/Navbar";
-import Sidebar from "../../component/layout/dashboard/Sidebar";
+import Navbar from "@component/layout/common/Navbar";
+import Sidebar from "@component/layout/dashboard/Sidebar";
 
-import "../../style/component/layout/index.css";
-import "../../style/component/layout/dashboard/index.css";
-import { useCanvasStore } from "../../lib/store/canvasStore";
+import "@style/component/layout/index.css";
+import "@style/component/layout/dashboard/index.css";
+import { useCanvasStore } from "@lib/store/canvasStore";
 import { useShallow } from "zustand/shallow";
 
 export default function DashboardLayout({

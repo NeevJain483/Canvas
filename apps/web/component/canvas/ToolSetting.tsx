@@ -1,6 +1,6 @@
 import React from "react";
-import ToolThicknessSlider from "./ToolThicknessSlider";
-import ToolColorSelector from "./ToolColorSelector";
+import ToolThicknessSlider from "@component/canvas/ToolThicknessSlider";
+import ToolColorSelector from "@component/canvas/ToolColorSelector";
 
 const ToolSetting = () => {
   return (

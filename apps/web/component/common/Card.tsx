@@ -3,7 +3,7 @@ import React from "react";
 
 import { IoImageOutline } from "react-icons/io5";
 
-import "../../style/component/dashboard/recentactivity.css";
+import "@style/component/dashboard/recentactivity.css";
 
 type Type = {
   src?: string;

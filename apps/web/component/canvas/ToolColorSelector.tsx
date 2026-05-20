@@ -1,5 +1,5 @@
 import React from "react";
-import { useCanvasStore } from "../../lib/store/canvasStore";
+import { useCanvasStore } from "@lib/store/canvasStore";
 
 const PALETTE_COLORS = [
   "#000000", // Black

@@ -3,7 +3,7 @@ import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useShallow } from "zustand/shallow";
 
-import { useProjectStore } from "../../../../lib/store/projectStore";
+import { useProjectStore } from "@lib/store/projectStore";
 
 type ProjectFormState = {
   title: string;
@@ -29,7 +29,9 @@ const Page = () => {
     color_mode: "RGB",
     background_color: "#ffffff",
   });
+
   const router = useRouter();
+
   const { createProject } = useProjectStore(
     useShallow((state) => ({
       createProject: state.createProject,
@@ -42,7 +44,7 @@ const Page = () => {
       const id = await createProject(form);
       console.log(id);
     } catch (error) {
-      // console.log(error);
+      console.log(error);
     }
   };
 

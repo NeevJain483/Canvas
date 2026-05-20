@@ -1,9 +1,9 @@
 import React from "react";
-import RecentActivity from "../../component/dashboard/RecentActivity";
+import RecentActivity from "@component/dashboard/RecentActivity";
 import { LuRuler } from "react-icons/lu";
 
-import "../../style/component/dashboard/index.css";
-import StatsCard from "../../component/dashboard/StatsCard";
+import "@style/component/dashboard/index.css";
+import StatsCard from "@component/dashboard/StatsCard";
 
 const page = () => {
   return (
