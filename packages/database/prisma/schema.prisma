@@ -60,7 +60,7 @@ model Project {
   width            Int       @default(1920)
   height           Int       @default(1080)
   dpi              Int       @default(72)
-  color_mode       ColorMode
+  color_mode       ColorMode @default(RGB)
   background_color String?   @db.VarChar(7)
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt

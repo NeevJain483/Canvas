@@ -1,13 +1,14 @@
 import { Router } from "express";
 import { verifyAccessToken } from "../middleware/verifyToken";
 import { db } from "@repo/common/config";
-import { CreateProjectSchema } from "@repo/common/schema";
+import { CreateProjectSchema, UUIDSchema } from "@repo/common/schema";
 import { RequestWithUser } from "../types";
 
 const ProjectRouter = Router();
 
 ProjectRouter.use(verifyAccessToken);
 
+// fetch multiple project
 ProjectRouter.get("/", async (req, res) => {
   const page = Number(req.query.page);
   const limit = Number(req.query.limit);
@@ -28,7 +29,7 @@ ProjectRouter.get("/", async (req, res) => {
     const totalProjects = await db.project.count();
 
     return res.json({
-      data: projects,
+      projects,
       meta: {
         total: totalProjects,
         page: page,
@@ -41,6 +42,7 @@ ProjectRouter.get("/", async (req, res) => {
   }
 });
 
+// create project
 ProjectRouter.post("/", async (req: RequestWithUser, res) => {
   const parsedData = CreateProjectSchema.safeParse(req.body);
   if (!parsedData.success) {
@@ -67,6 +69,7 @@ ProjectRouter.post("/", async (req: RequestWithUser, res) => {
     return res.status(201).json({
       message: "Project created successfully",
       project,
+      id: project.id,
     });
   } catch (error) {
     console.error("Error creating project:", error);
@@ -76,50 +79,67 @@ ProjectRouter.post("/", async (req: RequestWithUser, res) => {
   }
 });
 
-ProjectRouter.get("/:id", (req, res) => {
+// fetch project by id
+ProjectRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
-  return res.json({
-    message: "project with id",
-    id,
-  });
+  try {
+    const verifiedData = UUIDSchema.parse({ id });
+    const project = await db.project.findUnique({
+      where: {
+        id: verifiedData.id,
+      },
+    });
+    return res.json({
+      project,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
+// update project
 ProjectRouter.put("/:id", (req, res) => {
   return res.json({
     message: "update project",
   });
 });
 
+// delete project
 ProjectRouter.delete("/:id", (req, res) => {
   return res.json({
     message: "delete project",
   });
 });
 
+// duplicate project
 ProjectRouter.post("/:id/duplicate", (req, res) => {
   res.json({
     message: "Duplicate project",
   });
 });
 
+// check all versions of project
 ProjectRouter.get("/:id/versions", (req, res) => {
   res.json({
     message: "See all versions",
   });
 });
 
+// restore a version of project
 ProjectRouter.post("/:id/restore", (req, res) => {
   return res.json({
     message: "Restore specific version",
   });
 });
 
+// export the project
 ProjectRouter.post("/:id/export", (req, res) => {
   return res.json({
     message: "Export image",
   });
 });
 
+// download the project
 ProjectRouter.get("/:id/download", (req, res) => {
   return res.json({
     message: "Download project from here",

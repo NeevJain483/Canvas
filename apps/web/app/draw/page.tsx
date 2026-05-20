@@ -1,7 +1,7 @@
-import Canvas from "../../component/Canvas";
+import { DrawingCanvas } from "../../component/canvas/DrawingCanvas";
 
 const page = () => {
-  return <Canvas />;
+  return <DrawingCanvas />;
 };
 
 export default page;

@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, ChangeEvent, FormEvent } from "react";
-import { CreateProjectSchema } from "@repo/common/schema";
-import axios from "axios";
-import { BACKEND_URL, FRONTEND_URL } from "../../../../script/config";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import { useShallow } from "zustand/shallow";
+
+import { useProjectStore } from "../../../../lib/store/projectStore";
 
 type ProjectFormState = {
   title: string;
@@ -29,24 +29,20 @@ const Page = () => {
     color_mode: "RGB",
     background_color: "#ffffff",
   });
-  // const router = useRouter();
+  const router = useRouter();
+  const { createProject } = useProjectStore(
+    useShallow((state) => ({
+      createProject: state.createProject,
+    })),
+  );
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const parsedSchema = CreateProjectSchema.safeParse(form);
-    if (!parsedSchema.success) {
-      alert(parsedSchema.error);
-      return;
-    }
-    const data = parsedSchema.data;
     try {
-      const res = await axios.post(`${BACKEND_URL}/projects`,data,{withCredentials:true});
-      if(res.status == 201){
-        console.log(res.data)
-        // router.push(`${FRONTEND_URL}/dashboard/projects/${res.data}`)
-      }
+      const id = await createProject(form);
+      console.log(id);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 
@@ -66,7 +62,7 @@ const Page = () => {
   };
 
   return (
-    <div style={{ height: "100%" }}>
+    <div>
       <form
         onSubmit={handleSubmit}
         style={{

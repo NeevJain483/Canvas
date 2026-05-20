@@ -1,0 +1,8 @@
+.auth-layout-navbar{
+    display: flex;
+    background-color: rgba(0, 0, 0, 0);
+    justify-content: end;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+}

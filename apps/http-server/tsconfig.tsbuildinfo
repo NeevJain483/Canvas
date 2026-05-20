@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/middleware.ts","./src/script.ts","./src/types.ts","./src/router/authrouter.ts","./src/router/projectrouter.ts","./src/router/userrouter.ts"],"version":"5.9.2"}
+{"root":["./src/index.ts","./src/script.ts","./src/types.ts","./src/middleware/asynchandler.ts","./src/middleware/errorhandler.ts","./src/middleware/verifytoken.ts","./src/router/authrouter.ts","./src/router/projectrouter.ts","./src/router/userrouter.ts","./src/utils/auth.ts"],"version":"5.9.2"}

@@ -39,8 +39,6 @@ const Toast = () => {
     );
   }
 
-  console.log("Error is mine:", error.response)
-
   return (
     <Skeleton>
       {error && typeof error === "string" && (

@@ -1,20 +1,41 @@
-import React, { ReactNode } from "react";
-import { ToolManagerType } from "../script/types";
+import React, { ButtonHTMLAttributes, ReactNode } from "react";
 
-import "./index.css";
-
-type ToolButton = {
+interface ToolButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   label: ReactNode;
-  createTool: () => ToolManagerType;
-  setTool(tool: ToolManagerType): void;
-};
-const ToolButton = ({ label, createTool, setTool }: ToolButton) => {
+  onClick: () => void;
+  isActive?: boolean; 
+}
+
+const ToolButton: React.FC<ToolButtonProps> = ({
+  label,
+  onClick,
+  isActive = false,
+  className = "",
+  style,
+  ...props
+}) => {
   return (
-    <div>
-      <button className="tool-button" onClick={() => setTool(createTool())}>
-        {label}
-      </button>
-    </div>
+    <button
+      onClick={onClick}
+      className={`tool-btn ${isActive ? "active" : ""} ${className}`}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "36px",
+        height: "36px",
+        borderRadius: "6px",
+        cursor: "pointer",
+        transition: "all 0.1s ease",
+        backgroundColor: isActive ? "#e2e8f0" : "transparent",
+        border: isActive ? "1px solid #94a3b8" : "1px solid transparent",
+        color: isActive ? "#0f172a" : "#475569",
+        ...style,
+      }}
+      {...props}
+    >
+      {label}
+    </button>
   );
 };
 

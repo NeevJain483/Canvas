@@ -1,0 +1,31 @@
+.recent-activity {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px;
+}
+
+.recent-activity-card {
+  display: grid;
+  grid-template-rows: 1fr 24px;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  min-width: 270px;
+  height: 240px;
+  border: 2px solid black;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.recent-activity-card-create-new {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  border: 1px solid rgb(0, 110, 255);
+  color: rgb(0, 110, 255);
+  font-size: 18px;
+}

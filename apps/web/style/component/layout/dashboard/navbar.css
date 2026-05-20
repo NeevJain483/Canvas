@@ -1,0 +1,47 @@
+.dashboard-navigation,
+.dashboard-navigation-quick-action,
+.dashboard-navigation-search-container,
+.dashboard-navigation-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dashboard-navigation {
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 8px 20px;
+  width: 100%;
+  background-color: white;
+  border-bottom: 2px solid #eee;
+}
+.dashboard-navigation-logo {
+  background: rgb(217, 217, 217);
+}
+
+.dashboard-navigation-search-container,
+.dashboard-navigation-quick-action {
+  gap: 20px;
+}
+
+.dashboard-navigation-quick-action > button {
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 5px 10px;
+  color: rgb(122, 122, 122);
+  transition: all 0.3s ease-in-out;
+  border-bottom: 3px solid white;
+}
+
+.dashboard-navigation-quick-action > button:hover {
+  border-color: black;
+  translate: 0 -2px;
+}
+
+.dashboard-navigation-quick-action > button:active {
+    border-color: black;
+    color: black;
+}

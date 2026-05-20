@@ -12,7 +12,7 @@ UserRouter.use(verifyAccessToken);
 // --- SEARCH USERS ---
 UserRouter.get("/search", async (req, res) => {
   const { q } = req.query;
-  
+
   if (!q || typeof q !== "string") {
     return res.status(400).json({ message: "Search query is required." });
   }
@@ -38,7 +38,9 @@ UserRouter.get("/search", async (req, res) => {
     return res.status(200).json({ data: users });
   } catch (error) {
     console.error("User search error:", error);
-    return res.status(500).json({ message: "An error occurred while searching for users." });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while searching for users." });
   }
 });
 
@@ -62,7 +64,7 @@ UserRouter.get("/:id", async (req, res) => {
         profile_pic_url: true,
         email_verified: true,
         created_at: true,
-      }
+      },
     });
 
     if (!user) {
@@ -72,7 +74,9 @@ UserRouter.get("/:id", async (req, res) => {
     return res.status(200).json({ data: user });
   } catch (error) {
     console.error("Fetch user error:", error);
-    return res.status(500).json({ message: "An error occurred while fetching the user profile." });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while fetching the user profile." });
   }
 });
 
@@ -87,16 +91,21 @@ UserRouter.put("/:id", async (req: RequestWithUser, res) => {
 
   // Security: Prevent updating sensitive fields via this endpoint
   const restrictedFields = ["password_hash", "id", "email", "email_verified"];
-  const containsRestricted = restrictedFields.some(field => field in updateData);
+  const containsRestricted = restrictedFields.some(
+    (field) => field in updateData,
+  );
 
   if (containsRestricted) {
-    return res.status(403).json({ 
-      message: "You are not permitted to update sensitive account fields through this endpoint." 
+    return res.status(403).json({
+      message:
+        "You are not permitted to update sensitive account fields through this endpoint.",
     });
   }
 
   if (!req.user || req.user.id !== id) {
-    return res.status(403).json({ message: "You are not authorized to update this profile." });
+    return res
+      .status(403)
+      .json({ message: "You are not authorized to update this profile." });
   }
 
   try {
@@ -104,10 +113,10 @@ UserRouter.put("/:id", async (req: RequestWithUser, res) => {
       where: { id: String(id) },
       data: updateData,
     });
-    
-    return res.status(200).json({ 
+
+    return res.status(200).json({
       message: "Profile updated successfully.",
-      data: updatedUser 
+      data: updatedUser,
     });
   } catch (error: any) {
     return res.status(500).json({ message: "Failed to update profile data." });
@@ -123,13 +132,15 @@ UserRouter.get("/:id/projects", async (req, res) => {
   }
 
   try {
-    const projects = await db.project.findMany({ 
-        where: { owner_id: id } 
+    const projects = await db.project.findMany({
+      where: { owner_id: id },
     });
 
     return res.status(200).json({ data: projects });
   } catch (error) {
-    return res.status(500).json({ message: "An error occurred while fetching projects." });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while fetching projects." });
   }
 });
 
@@ -142,17 +153,23 @@ UserRouter.delete("/:id", async (req: RequestWithUser, res) => {
   }
 
   if (!req.user || req.user.id !== id) {
-    return res.status(403).json({ message: "You are not authorized to delete this account." });
+    return res
+      .status(403)
+      .json({ message: "You are not authorized to delete this account." });
   }
 
   try {
     await db.user.delete({ where: { id } });
-    return res.status(200).json({ message: "User account successfully deleted." });
+    return res
+      .status(200)
+      .json({ message: "User account successfully deleted." });
   } catch (error: any) {
     if (error.code === "P2025") {
       return res.status(404).json({ message: "User account not found." });
     }
-    return res.status(500).json({ message: "An error occurred while deleting the account." });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while deleting the account." });
   }
 });
 

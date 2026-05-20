@@ -126,7 +126,12 @@ AuthRouter.post(
     const { newPassword, code } = req.body;
     const email = req.user?.email;
 
-    if (!email || !codes[email] || codes[email].code !== parseInt(code) || code[email].expireIn < Date.now()) {
+    if (
+      !email ||
+      !codes[email] ||
+      codes[email].code !== parseInt(code) ||
+      code[email].expireIn < Date.now()
+    ) {
       return res
         .status(400)
         .json({ message: "Invalid or expired verification code." });
@@ -188,7 +193,9 @@ AuthRouter.post(
     if (!user) return res.status(404).json({ message: "User not found." });
 
     const { accessToken } = generateTokensAndSetCookie(res, user);
-    return res.status(200).json({ accessToken, message: "Token refreshed." });
+    return res
+      .status(200)
+      .json({ accessToken, expiresIn: 900, message: "Token refreshed." });
   }),
 );
 

@@ -7,9 +7,9 @@ import {
   VerifyEmailSchema,
   AuthResponseSchema,
   RefreshTokenResponseSchema,
-  AuthResponseType,
-  RefreshTokenResponseType,
 } from "@repo/common/schema";
+
+import { AuthResponseType, RefreshTokenResponseType } from "@repo/common/types";
 
 export const authAPI = {
   login: async (email: string, password: string): Promise<AuthResponseType> => {
@@ -18,7 +18,9 @@ export const authAPI = {
       const response = await apiClient.post("/auth/login", validatedData);
       return AuthResponseSchema.parse(response.data);
     } catch (error) {
-      throw new Error(`Login failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Login failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   },
   register: async (
@@ -41,7 +43,9 @@ export const authAPI = {
 
       return AuthResponseSchema.parse(response.data);
     } catch (error) {
-      throw new Error(`Register failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Register failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   },
   refreshToken: async (
@@ -54,7 +58,9 @@ export const authAPI = {
 
       return RefreshTokenResponseSchema.parse(response.data);
     } catch (error) {
-      throw new Error(`Refresh token failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Refresh token failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   },
   logout: async (): Promise<void> => {
@@ -70,7 +76,9 @@ export const authAPI = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Forgot password failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Forgot password failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   },
   resetPassword: async (
@@ -89,7 +97,9 @@ export const authAPI = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Reset password failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Reset password failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   },
   verifyEmail: async (
@@ -99,10 +109,15 @@ export const authAPI = {
     try {
       const validatedData = VerifyEmailSchema.parse({ email, code });
 
-      const response = await apiClient.post("/auth/verify-email", validatedData);
+      const response = await apiClient.post(
+        "/auth/verify-email",
+        validatedData,
+      );
       return response.data;
     } catch (error) {
-      throw new Error(`Verify email failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Verify email failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   },
 };

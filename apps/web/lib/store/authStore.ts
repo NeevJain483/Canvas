@@ -169,7 +169,6 @@ export const useAuthStore = create<AuthStore>()(
             "/auth/reset-password",
             validatedData,
           );
-          console.log("Response: ",response)
           const { message } = response.data;
           set((state) => {
             state.isLoading = false;
@@ -214,11 +213,6 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       refreshAccessToken: async () => {
-        const { refreshToken } = get() as AuthStore;
-        if (!refreshToken) {
-          throw new Error("No refresh token available");
-        }
-
         try {
           const res = await apiClient.post("/auth/refresh-token");
           const { accessToken, expiresIn } = RefreshTokenResponseSchema.parse(

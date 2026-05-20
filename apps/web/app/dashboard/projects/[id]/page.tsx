@@ -1,9 +1,17 @@
-import React from 'react'
+import Main from "../../../../component/dashboard/projects/Main";
 
-const page = () => {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
   return (
-    <div>id</div>
-  )
+    <>
+      <Main id={id}>
+        
+      </Main>
+    </>
+  );
 }
-
-export default page

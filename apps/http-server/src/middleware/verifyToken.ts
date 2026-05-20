@@ -53,14 +53,12 @@ export const verifyAccessToken = (
   }
 };
 
-
 export const verifyRefreshToken = (
   req: RequestWithUser,
   res: Response,
   next: NextFunction,
 ) => {
   const refresh_token = req.cookies["draw-cookie"];
-
   if (!refresh_token) {
     res.status(401).json({ msg: "Login first" });
     return;

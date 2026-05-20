@@ -1,5 +1,8 @@
 import z from "zod";
 
+import { Prisma } from "../../database/generated/prisma/index.js";
+import type { UUID } from "./types.js";
+
 export const RegisterSchema = z.object({
   email: z
     .email()
@@ -42,6 +45,10 @@ export const CreateProjectSchema = z.object({
   background_color: z.string().length(7),
 });
 
+export const UUIDSchema = z.object({
+  id: z.uuid() as z.ZodType<UUID>,
+});
+
 export const UserSchema = z.object({
   id: z.string(),
   email: z.email(),
@@ -57,7 +64,7 @@ export const AuthResponseSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string(),
   expiresIn: z.number(),
-  message:z.string()
+  message: z.string(),
 });
 
 export const RefreshTokenResponseSchema = z.object({
@@ -65,10 +72,25 @@ export const RefreshTokenResponseSchema = z.object({
   expiresIn: z.number(),
 });
 
-export type UserType = z.infer<typeof UserSchema>;
-export type AuthResponseType = z.infer<typeof AuthResponseSchema>;
-export type RefreshTokenResponseType = z.infer<
-  typeof RefreshTokenResponseSchema
->;
-export type LoginPayloadType = z.infer<typeof LoginSchema>;
-export type RegisterPayloadType = z.infer<typeof RegisterSchema>;
+export const ProjectDataSchema = z.object({
+  id: z.uuid(),
+  owner_id: z.uuid(),
+  title: z.string(),
+  description: z.string(),
+  thumbnail_url: z.string().optional(),
+  is_public: z.boolean(),
+  width: z.number(),
+  height: z.number(),
+  dpi: z.number(),
+  color_mode: z.enum(["RGB", "CMYK", "Grayscale"]),
+  background_color: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  last_edited_at: z.string().nullable(),
+  is_archived: z.boolean(),
+  view_count: z.number(),
+}) satisfies z.ZodType<Prisma.ProjectUncheckedCreateInput>;
+
+export const ProjectResponseSchema = z.object({
+  projects: z.array(ProjectDataSchema),
+});

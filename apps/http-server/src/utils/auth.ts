@@ -33,7 +33,7 @@ export const generateTokensAndSetCookie = (res: Response, user: any) => {
     httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24 * 7,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
   });
 
   return { accessToken, refreshToken };
