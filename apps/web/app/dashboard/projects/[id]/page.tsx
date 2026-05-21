@@ -1,4 +1,4 @@
-import Main from "@component/dashboard/projects/Main";
+import Main from "@component/projects/Main";
 
 export default async function Page({
   params,
@@ -6,7 +6,7 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
+  
   return (
     <>
       <Main id={id}>

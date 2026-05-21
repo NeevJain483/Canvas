@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 
 import { useCanvasStore } from "@lib/store/canvasStore";
@@ -9,6 +9,7 @@ import Toolbar from "@component/canvas/Toolbar";
 import { useShallow } from "zustand/shallow";
 import ToolSetting from "@component/canvas/ToolSetting";
 import More from "@component/canvas/More";
+import { useProjectStore } from "@lib/store/projectStore";
 
 export const DrawingCanvas = () => {
   const { setFullScreenMode, fullScreenMode } = useCanvasStore(
@@ -20,7 +21,25 @@ export const DrawingCanvas = () => {
     })),
   );
 
+  const currentProject = useProjectStore((state) => state.currentProject);
   const { canvasRef, previewRef } = useCanvas();
+
+  useEffect(() => {
+    if (!currentProject || !canvasRef.current || !previewRef.current) return;
+
+    const { width, height } = currentProject;
+
+    if (
+      canvasRef.current.width !== width ||
+      canvasRef.current.height !== height
+    ) {
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
+
+      previewRef.current.width = width;
+      previewRef.current.height = height;
+    }
+  }, [currentProject, canvasRef, previewRef]);
 
   return (
     <>
@@ -35,6 +54,7 @@ export const DrawingCanvas = () => {
               backgroundColor: "#c1ccd8",
               borderRadius: "8px",
               border: "1px solid #e2e8f0",
+              cursor: "pointer",
             }}
             onClick={() => setFullScreenMode(null)}
           >
@@ -45,7 +65,9 @@ export const DrawingCanvas = () => {
             )}
           </button>
         </div>
-        <More canvasEngineRef={canvasRef}/>
+
+        <More canvasEngineRef={canvasRef} />
+
         {!fullScreenMode && (
           <>
             <div className="toolbar">
@@ -56,6 +78,7 @@ export const DrawingCanvas = () => {
             </div>
           </>
         )}
+
         <canvas className="main-canvas" ref={canvasRef}></canvas>
         <canvas className="preview-canvas" ref={previewRef}></canvas>
         <div></div>

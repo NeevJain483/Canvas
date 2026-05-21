@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useEffect } from "react";
 import { useCanvasStore } from "@lib/store/canvasStore";
 import { CanvasEngine } from "@lib/canvas/canvasEngine";
@@ -13,7 +15,6 @@ export function useCanvas() {
   const isDrawing = useRef(false);
   const lastPoint = useRef<{ x: number; y: number } | null>(null);
   const currentPoint = useRef<{ x: number; y: number } | null>(null);
-  const panStartPoint = useRef<{ x: number; y: number } | null>(null);
 
   const currentTool = useCanvasStore((state) => state.currentTool);
   const currentToolRef = useRef(currentTool);
@@ -29,7 +30,6 @@ export function useCanvas() {
 
     if (!canvasEngineRef.current) {
       canvasEngineRef.current = new CanvasEngine(canvas, preview);
-      canvasEngineRef.current.resize();
     }
 
     if (!brushEngineRef.current) {
@@ -42,22 +42,37 @@ export function useCanvas() {
         currentColor: state.currentColor,
       });
     }
+
     const engine = canvasEngineRef.current;
     const brush = brushEngineRef.current;
     const mainCtx = engine.mainCtx;
     const previewCtx = engine.previewCtx;
 
+    const getCanvasCoordinates = (
+      e: PointerEvent,
+    ): { x: number; y: number } => {
+      const rect = preview.getBoundingClientRect();
+
+      const x = ((e.clientX - rect.left) / rect.width) * preview.width;
+      const y = ((e.clientY - rect.top) / rect.height) * preview.height;
+
+      return { x, y };
+    };
+
     const handleDown = (e: PointerEvent) => {
+      if (!mainCtx || !previewCtx) return;
+
+      preview.setPointerCapture(e.pointerId);
+
+      isDrawing.current = true;
+      const { x, y } = getCanvasCoordinates(e);
+
+      lastPoint.current = { x, y };
+      currentPoint.current = { x, y };
+
       const state = useCanvasStore.getState();
       const activeTool = currentToolRef.current;
 
-      if (!mainCtx || !previewCtx) return;
-
-      isDrawing.current = true;
-      const { offsetX, offsetY } = e;
-      lastPoint.current = { x: offsetX, y: offsetY };
-      currentPoint.current = { x: offsetX, y: offsetY };
-      panStartPoint.current = { x: offsetX, y: offsetY };
       if (!TOOL_PROPERTIES[activeTool].canDraw) return;
 
       brush.updateSettings({
@@ -71,26 +86,24 @@ export function useCanvas() {
       if (TOOL_PROPERTIES[activeTool].requiresPreview) {
         brush.applyBrushState(previewCtx);
         previewCtx.beginPath();
-        previewCtx.moveTo(offsetX, offsetY);
+        previewCtx.moveTo(x, y);
       } else {
         brush.applyBrushState(mainCtx);
         mainCtx.beginPath();
-        mainCtx.moveTo(offsetX, offsetY);
+        mainCtx.moveTo(x, y);
       }
     };
 
     const handleMove = (e: PointerEvent) => {
       if (!isDrawing.current || !mainCtx || !lastPoint.current) return;
 
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const { x, y } = getCanvasCoordinates(e);
 
       currentPoint.current = { x, y };
       const state = useCanvasStore.getState();
       const activeTool = currentToolRef.current;
 
-      if (!TOOL_PROPERTIES[activeTool].canDraw || !lastPoint.current) return;
+      if (!TOOL_PROPERTIES[activeTool].canDraw) return;
 
       if (TOOL_PROPERTIES[activeTool].requiresPreview) {
         engine.clearPreview();
@@ -103,7 +116,6 @@ export function useCanvas() {
           y,
         );
       } else {
-
         switch (activeTool) {
           case "brush":
             ToolLogic.brush(
@@ -111,7 +123,7 @@ export function useCanvas() {
               lastPoint.current,
               { x, y },
               state.brushSize,
-              state.brushHardness
+              state.brushHardness,
             );
             break;
           case "eraser":
@@ -122,12 +134,17 @@ export function useCanvas() {
       }
     };
 
-    const handleUp = () => {
-      const state = useCanvasStore.getState();
-      const activeTool = currentToolRef.current; 
+    const handleUp = (e: PointerEvent) => {
+      const activeTool = currentToolRef.current;
 
       if (!isDrawing.current) return;
       isDrawing.current = false;
+
+      try {
+        preview.releasePointerCapture(e.pointerId);
+      } catch (err) {
+        console.log(err);
+      }
 
       if (!TOOL_PROPERTIES[activeTool].canDraw || !mainCtx) return;
 
@@ -157,20 +174,16 @@ export function useCanvas() {
       currentPoint.current = null;
     };
 
-    const handleResize = () => engine.resize();
-
     preview.addEventListener("pointerdown", handleDown);
     window.addEventListener("pointermove", handleMove);
     window.addEventListener("pointerup", handleUp);
-    window.addEventListener("resize", handleResize);
 
     return () => {
       preview.removeEventListener("pointerdown", handleDown);
       window.removeEventListener("pointermove", handleMove);
       window.removeEventListener("pointerup", handleUp);
-      window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [canvasRef, previewRef]);
 
   return { canvasRef, previewRef, canvasEngineRef };
 }

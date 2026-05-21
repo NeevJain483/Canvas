@@ -17,44 +17,6 @@ export class CanvasEngine {
     this.previewCtx = pCtx;
   }
 
-  resize() {
-    const rect = this.previewCanvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-
-    const targetWidth = rect.width * dpr;
-    const targetHeight = rect.height * dpr;
-
-    if (
-      this.mainCanvas.width !== targetWidth ||
-      this.mainCanvas.height !== targetHeight
-    ) {
-      let backup: ImageData | null = null;
-      if (this.mainCanvas.width > 0 && this.mainCanvas.height > 0) {
-        backup = this.mainCtx.getImageData(
-          0,
-          0,
-          this.mainCanvas.width,
-          this.mainCanvas.height,
-        );
-      }
-      this.mainCanvas.width = targetWidth;
-      this.mainCanvas.height = targetHeight;
-      this.previewCanvas.width = targetWidth;
-      this.previewCanvas.height = targetHeight;
-
-      this.mainCtx.setTransform(1, 0, 0, 1, 0, 0);
-      this.previewCtx.setTransform(1, 0, 0, 1, 0, 0);
-      this.mainCtx.scale(dpr, dpr);
-      this.previewCtx.scale(dpr, dpr);
-
-      if (backup) {
-        this.mainCtx.setTransform(1, 0, 0, 1, 0, 0);
-        this.mainCtx.putImageData(backup, 0, 0);
-        this.mainCtx.scale(dpr, dpr);
-      }
-    }
-  }
-
   clearPreview() {
     const dpr = window.devicePixelRatio || 1;
     this.previewCtx.clearRect(
