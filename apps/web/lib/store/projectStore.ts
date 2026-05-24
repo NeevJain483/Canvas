@@ -8,6 +8,7 @@ import {
   CreateProjectSchema,
   ProjectResponseSchema,
   ProjectDataSchema,
+  UserProjectResonseSchema,
 } from "@repo/common/schema";
 
 interface FilterOptions {
@@ -19,12 +20,14 @@ interface ProjectStore {
   projects: ProjectDataType[];
   currentProject: ProjectDataType | null;
   projectsLoading: boolean;
-  projectError: string | null;
+  projectError: null | any;
 
   // pagination & filtering
   currentPage: number;
-  pageSize: number;
+  totalPages: number;
   totalProjects: number;
+  publicProjects: number;
+  privateProjects: number;
   searchQuery: string;
   filterBy: "recent" | "oldest" | "name" | "size";
 
@@ -40,13 +43,19 @@ interface ProjectStore {
     limit: number,
     filters?: FilterOptions,
   ): Promise<void>;
+  fetchProjectsByUser(
+    userId: UUID,
+    page: number,
+    limit: number,
+    filters?: FilterOptions,
+  ): Promise<void>;
   fetchProjectById(id: UUID, data: Partial<ProjectDataType>): Promise<void>;
   setCurrentProject(project: ProjectDataType): void;
 
   // CRUD Actions
   createProject(data: CreateProjectType): Promise<UUID>;
-  // updateProject(id: UUID, data: Partial<Project>): Promise<void>;
-  // deleteProject(id: UUID): Promise<void>;
+  // updateProject(id: UUID, data: Partial<ProjectDataType>): Promise<void>;
+  deleteProject(id: UUID): Promise<void>;
   // duplicateProject(id: UUID): Promise<UUID>;
 
   // Save Actions
@@ -71,15 +80,17 @@ export const useProjectStore = create<ProjectStore>()(
 
       // pagination & filter
       currentPage: 1,
-      pageSize: 1,
+      totalPages: 1,
       totalProjects: 0,
+      publicProjects: 0,
+      privateProjects: 0,
       searchQuery: "",
       filterBy: "recent",
 
       // auto-save
       autoSaveEnabled: true,
       lastAutoSaveTime: Date.now(),
-      autoSaveInterval: 30000,
+      autoSaveInterval: 15000,
       isSaving: false,
 
       //fetch action
@@ -108,6 +119,37 @@ export const useProjectStore = create<ProjectStore>()(
           });
         }
       },
+      fetchProjectsByUser: async (
+        userId: UUID,
+        page: number,
+        limit: number,
+        filters?: FilterOptions,
+      ) => {
+        set((state) => {
+          state.projectsLoading = true;
+        });
+        try {
+          const response = await apiClient.get(
+            `/users/${userId}/projects?page=${page}&limit=${limit}`,
+          );
+          const { projects, meta } = UserProjectResonseSchema.parse(
+            response.data,
+          );
+          set((state) => {
+            state.projectsLoading = false;
+            state.projects = projects;
+            state.totalProjects = meta.total;
+            state.publicProjects = meta.publicCount;
+            state.privateProjects = meta.privateCount;
+            state.totalPages = meta.totalPages;
+          });
+        } catch (error: any) {
+          set((state) => {
+            state.projectError = error;
+            state.projectsLoading = false;
+          });
+        }
+      },
       fetchProjectById: async (id: UUID, data: Partial<ProjectDataType>) => {
         set((state) => {
           state.currentProject = null;
@@ -117,14 +159,15 @@ export const useProjectStore = create<ProjectStore>()(
           const verifiedData = UUIDSchema.parse({ id: id as UUID });
           const response = await apiClient.get(`/projects/${verifiedData.id}`);
           const project = ProjectDataSchema.parse(response.data.project);
-          set((state)=>{
+          set((state) => {
             state.currentProject = project;
             state.projectsLoading = false;
-          })
+          });
         } catch (error) {
-          set((state)=>{
+          set((state) => {
+            state.projectError = error;
             state.projectsLoading = false;
-          })
+          });
         }
       },
       setCurrentProject: (project: ProjectDataType) => {
@@ -136,10 +179,10 @@ export const useProjectStore = create<ProjectStore>()(
 
       // CRUD Actions
       createProject: async (data: CreateProjectType): Promise<UUID> => {
-        set((state) => ({
-          projectsLoading: true,
-          projectError: null,
-        }));
+        set((state) => {
+          state.projectsLoading = true;
+          state.projectError = null;
+        });
 
         try {
           const verifiedData = CreateProjectSchema.parse(data);
@@ -147,23 +190,43 @@ export const useProjectStore = create<ProjectStore>()(
 
           const { id } = UUIDSchema.parse(res.data);
 
-          set((state) => ({ projectsLoading: false }));
+          set((state) => {
+            state.projectsLoading = false;
+          });
           return id as UUID;
         } catch (error: any) {
-          console.error("Project creation failed:", error);
-
-          set((state) => ({
-            projectError: error.message || "Failed to create project",
-            projectsLoading: false,
-          }));
+          set((state) => {
+            state.projectError = error.message || "Failed to create project";
+            state.projectsLoading = false;
+          });
           throw error;
+        }
+      },
+      deleteProject: async (id: UUID) => {
+        set((state) => {
+          state.projectError = null;
+          state.projectsLoading = true;
+        });
+
+        try {
+          const response = await apiClient.delete(`/projects/${id}`);
+          console.log(response.data)
+          set((state) => {
+            state.projectsLoading = false;
+            state.projects = get().projects.filter((el)=>el.id != id)
+          });
+        } catch (error: any) {
+          set((state) => {
+            state.projectError = error;
+            state.projectsLoading = false;
+          });
         }
       },
     })),
     {
       name: "project-store",
       partialize: (state) => ({
-        projects:state.projects,
+        projects: state.projects,
         currentProject: state.currentProject,
       }),
     },

@@ -6,6 +6,8 @@ import { RequestWithUser } from "../types";
 
 const ProjectRouter = Router();
 
+type UUID = `${string}-${string}-${string}-${string}-${string}`;
+
 ProjectRouter.use(verifyAccessToken);
 
 // fetch multiple project
@@ -97,7 +99,7 @@ ProjectRouter.get("/:id", async (req, res) => {
   }
 });
 
-// update project
+// TODO: update project
 ProjectRouter.put("/:id", (req, res) => {
   return res.json({
     message: "update project",
@@ -105,41 +107,81 @@ ProjectRouter.put("/:id", (req, res) => {
 });
 
 // delete project
-ProjectRouter.delete("/:id", (req, res) => {
-  return res.json({
-    message: "delete project",
-  });
+ProjectRouter.delete("/:id", async (req: RequestWithUser, res) => {
+  const id = req.params.id;
+
+  const validation = UUIDSchema.safeParse({ id });
+
+  if (!validation.success) {
+    return res.status(400).json({
+      message: "Invalid or missing Project ID format.",
+    });
+  }
+
+  const validatedId = validation.data.id;
+
+  if (!req.user?.id) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized. Missing user session profile token." });
+  }
+
+  try {
+    const deletedProject = await db.project.delete({
+      where: {
+        id: validatedId,
+        owner_id: req.user.id,
+      },
+    });
+
+    return res.status(200).json({
+      message: "deleted project",
+      id: deletedProject.id,
+    });
+  } catch (error: any) {
+    console.error("Error deleting project:", error);
+
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        message:
+          "Project not found or you do not have permission to delete it.",
+      });
+    }
+    return res.status(500).json({
+      message: "An internal server error occurred while deleting the project.",
+    });
+  }
 });
 
-// duplicate project
+// TODO: duplicate project
 ProjectRouter.post("/:id/duplicate", (req, res) => {
   res.json({
     message: "Duplicate project",
   });
 });
 
-// check all versions of project
+// TODO: check all versions of project
 ProjectRouter.get("/:id/versions", (req, res) => {
   res.json({
     message: "See all versions",
   });
 });
 
-// restore a version of project
+// TODO: restore a version of project
 ProjectRouter.post("/:id/restore", (req, res) => {
   return res.json({
     message: "Restore specific version",
   });
 });
 
-// export the project
+// TODO: export the project
 ProjectRouter.post("/:id/export", (req, res) => {
   return res.json({
     message: "Export image",
   });
 });
 
-// download the project
+// TODO: download the project
 ProjectRouter.get("/:id/download", (req, res) => {
   return res.json({
     message: "Download project from here",

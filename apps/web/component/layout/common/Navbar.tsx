@@ -6,13 +6,15 @@ import { IoIosSearch } from "react-icons/io";
 import "@style/component/layout/dashboard/navbar.css";
 import { useRouter } from "next/navigation";
 
+import logo from "@public/logo.svg" 
+
 const Navbar = () => {
   const router = useRouter();
   return (
     <>
       <nav className="dashboard-navigation">
         <div className="dashboard-navigation-logo">
-          <Image src={"/logo.svg"} alt="logo" width={60} height={60}></Image>
+          <Image src={logo} alt="logo" width={60} height={60}></Image>
         </div>
         <div className="dashboard-navigation-quick-action">
           <button onClick={()=>router.push("/dashboard")}>Home</button>

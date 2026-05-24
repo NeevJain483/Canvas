@@ -1,8 +1,9 @@
-import z from "zod";
+import z, { number } from "zod";
 
 import { Prisma } from "../../database/generated/prisma/index.js";
 import type { UUID } from "./types.js";
 
+// Auth Schema ------------------------------
 export const RegisterSchema = z.object({
   email: z
     .email()
@@ -59,6 +60,7 @@ export const UserSchema = z.object({
   createdAt: z.string(),
 });
 
+// Response Schema ------------------------------
 export const AuthResponseSchema = z.object({
   user: UserSchema,
   accessToken: z.string(),
@@ -90,6 +92,18 @@ export const ProjectDataSchema = z.object({
   is_archived: z.boolean(),
   view_count: z.number(),
 }) satisfies z.ZodType<Prisma.ProjectUncheckedCreateInput>;
+
+export const UserProjectResonseSchema = z.object({
+  projects: z.array(ProjectDataSchema),
+  meta: z.object({
+    total: z.number(),
+    page: z.number(),
+    limit: z.number(),
+    totalPages: z.number(),
+    publicCount: z.number(),
+    privateCount: z.number(),
+  }),
+});
 
 export const ProjectResponseSchema = z.object({
   projects: z.array(ProjectDataSchema),

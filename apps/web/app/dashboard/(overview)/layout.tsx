@@ -11,14 +11,15 @@ export default function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
 
+
   return (
     <>
       <div className="layout">
-        <Navbar></Navbar>
-          <div className="dashboard-layout-sidebar-main-container">
-            <Sidebar></Sidebar>
-            {children}
-          </div>
+        <Navbar />
+        <div className="dashboard-layout-sidebar-main-container">
+          <Sidebar />
+          {children}
+        </div>
       </div>
     </>
   );

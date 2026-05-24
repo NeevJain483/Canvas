@@ -2,7 +2,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MdOutlineExpandMore, MdOutlineDownload } from "react-icons/md";
 import { ExportFormat, ExportUtils } from "@lib/canvas/export";
-
+import { MoreBtn, OptionForMore } from "@ui/MoreBtn";
+import { FaSave } from "react-icons/fa";
 
 interface FormatOption {
   id: ExportFormat;
@@ -26,7 +27,10 @@ const More: React.FC<MoreProps> = ({ canvasEngineRef }) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setToggle(false);
       }
     };
@@ -59,26 +63,7 @@ const More: React.FC<MoreProps> = ({ canvasEngineRef }) => {
         zIndex: 4,
       }}
     >
-      <button
-        onClick={() => setToggle(!toggle)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "36px",
-          height: "36px",
-          borderRadius: "6px",
-          border: "1px solid #cbd5e1",
-          backgroundColor: toggle ? "#b8cae2" : "#e2e8f0",
-          cursor: "pointer",
-          color: "#475569",
-          transform: toggle ? "rotate(180deg)" : "rotate(0deg)",
-          transition: "transform 0.2s ease, background-color 0.15s ease",
-        }}
-        title="More Options"
-      >
-        <MdOutlineExpandMore size={20} />
-      </button>
+      <MoreBtn icon={MdOutlineExpandMore} onClick={() => setToggle(!toggle)} />
 
       {toggle && (
         <div
@@ -91,7 +76,8 @@ const More: React.FC<MoreProps> = ({ canvasEngineRef }) => {
             backgroundColor: "#ffffff",
             border: "1px solid #e2e8f0",
             borderRadius: "8px",
-            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+            boxShadow:
+              "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
             padding: "4px",
             display: "flex",
             flexDirection: "column",
@@ -99,32 +85,9 @@ const More: React.FC<MoreProps> = ({ canvasEngineRef }) => {
           }}
         >
           {EXPORT_FORMATS.map((format) => (
-            <button
-              key={format.id}
-              onClick={() => handleExport(format.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                width: "100%",
-                padding: "8px 12px",
-                backgroundColor: "transparent",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                textAlign: "left",
-                fontSize: "14px",
-                fontWeight: 500,
-                color: "#334155",
-                transition: "background-color 0.1s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f1f5f9")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-            >
-              <MdOutlineDownload size={18} style={{ color: format.iconColor }} />
-              {format.label}
-            </button>
+              <OptionForMore key={format.id} onClick={() => handleExport(format.id)} format={format} icon={MdOutlineDownload}/>
           ))}
+          {/* <OptionForMore key={Math.random()} format={{iconColor:"#2563eb",label:"Save"}} onClick={()=>console.log("")} icon={FaSave}/> */}
         </div>
       )}
     </div>

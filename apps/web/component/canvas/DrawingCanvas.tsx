@@ -79,8 +79,16 @@ export const DrawingCanvas = () => {
           </>
         )}
 
-        <canvas className="main-canvas" ref={canvasRef}></canvas>
-        <canvas className="preview-canvas" ref={previewRef}></canvas>
+        <canvas
+          style={{ border: "2px solid red" }}
+          className="main-canvas"
+          ref={canvasRef}
+        ></canvas>
+        <canvas
+          style={{ border: "2px solid black" }}
+          className="preview-canvas"
+          ref={previewRef}
+        ></canvas>
         <div></div>
       </div>
     </>

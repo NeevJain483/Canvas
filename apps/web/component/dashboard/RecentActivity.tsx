@@ -6,22 +6,26 @@ import { useRouter } from "next/navigation";
 import "@style/component/dashboard/recentactivity.css";
 import { useProjectStore } from "@lib/store/projectStore";
 import { useShallow } from "zustand/shallow";
-import Card from "../common/Card";
+import { useAuthStore } from "@lib/store/authStore";
+import { UUID } from "@repo/common/types";
+import ProjectCard from "@component/projects/ProjectCard";
 
 const RecentActivity = () => {
   const router = useRouter();
-  const { projects, fetchProjects } = useProjectStore(
+  const user = useAuthStore((state) => state.user);
+  const { projects, fetchProjectsByUser } = useProjectStore(
     useShallow((state) => ({
       projects: state.projects,
-      fetchProjects: state.fetchProjects,
+      fetchProjectsByUser: state.fetchProjectsByUser,
     })),
   );
 
   React.useEffect(() => {
     (async () => {
-      await fetchProjects(1, 3);
+      if (!user) return;
+      await fetchProjectsByUser(user.id as UUID, 1, 3);
     })();
-  }, [fetchProjects]);
+  }, [fetchProjectsByUser, user]);
 
   React.useEffect(() => {
     console.log("Projects updated in store: ", projects);
@@ -30,7 +34,7 @@ const RecentActivity = () => {
   return (
     <>
       <div className="recent-activity">
-        <button
+        <button style={{height:"100%"}}
           onClick={() => router.push("/dashboard/projects/new")}
           className="recent-activity-card recent-activity-card-create-new"
         >
@@ -38,7 +42,9 @@ const RecentActivity = () => {
           <p>Create new 2D design</p>
         </button>
         {projects.map((el, idx) => {
-          return <Card key={idx} src={el.thumbnail_url || ""} title={el.title}></Card>;
+          return (
+            <ProjectCard key={idx} project={el}/>
+          );
         })}
       </div>
     </>

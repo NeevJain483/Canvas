@@ -16,22 +16,17 @@ export type ToolType =
 // | "pen";
 
 export type BrushSettings = {
-  brushSize: number; // give it a range from 1 to 100
+  brushSize: number; // give it a range from 2 to 48
   brushOpacity: number; // give it a range from 0 to 1
   brushHardness: number; // give it a range from 0 to 1
   currentColor: string; // can be hex or rgb only
   brushBlendMode: GlobalCompositeOperation;
 };
 
-type CanvasStoreType = {
+type CanvasStoreType = BrushSettings & {
   fullScreenMode: boolean;
   //Drawing State
   currentTool: ToolType;
-  brushSize: number; // give it a range from 1 to 100
-  brushOpacity: number; // give it a range from 0 to 1
-  brushHardness: number; // give it a range from 0 to 1
-  currentColor: string; // can be hex or rgb only
-  brushBlendMode: GlobalCompositeOperation;
 
   // History & Undo/Redo
   canvasHistory: ImageData[];

@@ -126,6 +126,10 @@ UserRouter.put("/:id", async (req: RequestWithUser, res) => {
 // --- GET USER PROJECTS ---
 UserRouter.get("/:id/projects", async (req, res) => {
   const { id } = req.params;
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+
+  const skip = (page - 1) * limit;
 
   if (!isUuid(id)) {
     return res.status(400).json({ message: "Invalid user ID format." });
@@ -133,11 +137,40 @@ UserRouter.get("/:id/projects", async (req, res) => {
 
   try {
     const projects = await db.project.findMany({
+      skip: skip,
+      take: limit,
+      where: { owner_id: id },
+      orderBy: { created_at: "desc" },
+    });
+
+    const total = await db.project.count({
       where: { owner_id: id },
     });
 
-    return res.status(200).json({ data: projects });
+    const state = await db.project.groupBy({
+      where: { owner_id: id },
+      by: ["is_public"],
+      _count: {
+        is_public: true,
+      },
+    });
+
+    const publicCount = state.find((item) => item.is_public === true)?._count.is_public || 0;
+    const privateCount = state.find((item) => item.is_public === false)?._count.is_public || 0;
+    
+    return res.status(200).json({
+      projects,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        publicCount,
+        privateCount,
+      },
+    });
   } catch (error) {
+    console.error("Database fetch error:", error); // Log the actual error internally for debugging
     return res
       .status(500)
       .json({ message: "An error occurred while fetching projects." });
