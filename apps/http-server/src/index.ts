@@ -12,6 +12,12 @@ import UserRouter from "./router/userRouter";
 import { db, FRONTEND_URL } from "@repo/common/config";
 import ProjectRouter from "./router/projectRouter";
 
+import { ProjectModel,initailizeMongoDB } from "@repo/mongodb/model";
+
+(async () => {
+  await initailizeMongoDB();
+})()
+
 const PORT = 4002;
 const app = express();
 
@@ -29,18 +35,34 @@ app.use("/api/v1/users", UserRouter);
 app.use("/api/v1/projects", ProjectRouter);
 
 app.get("/api/v1/ping", async (req, res) => {
+  const status = {
+    postgres: "Unknown",
+    mongodb: "Unknown"
+  };
+
   try {
-    await db.user.findMany({});
-    return res.json({
-      message: "pong",
-      database: "OK",
-    });
+    await db.user.findFirst({});
+    status.postgres = "Healthy";
   } catch (error) {
-    return res.json({
-      message: "database is not working",
-      error: error,
-    });
+    status.postgres = "Unhealthy";
+    console.log(error)
   }
+
+  try {
+    await ProjectModel.findOne({});
+    status.mongodb = "Healthy";
+  } catch (error) {
+    status.mongodb = "Unhealthy";
+    console.log(error)
+  }
+  const isHealthy = status.postgres === "Healthy" && status.mongodb === "Healthy";
+  const statusCode = isHealthy ? 200 : 500;
+
+  return res.status(statusCode).json({
+    success: isHealthy,
+    message: isHealthy ? "All systems operational" : "One or more services are degraded",
+    services: status
+  });
 });
 
 app.listen(PORT, () => {

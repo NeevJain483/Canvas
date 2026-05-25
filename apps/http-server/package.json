@@ -11,7 +11,8 @@
   },
   "devDependencies": {
     "@repo/common": "*",
-    "@repo/database": "*",
+    "@repo/postgresdb": "*",
+    "@repo/mongodb": "*",
     "@types/node": "^22.19.13"
   },
   "keywords": [],

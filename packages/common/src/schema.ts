@@ -1,6 +1,6 @@
 import z, { number } from "zod";
 
-import { Prisma } from "../../database/generated/prisma/index.js";
+import { Prisma } from "../../postgresdb/generated/prisma/index.js";
 import type { UUID } from "./types.js";
 
 // Auth Schema ------------------------------

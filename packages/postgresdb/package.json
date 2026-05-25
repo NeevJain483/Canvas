@@ -1,5 +1,5 @@
 {
-  "name": "@repo/database",
+  "name": "@repo/postgresdb",
   "version": "1.0.0",
   "devDependencies": {
     "@repo/typescript-config": "*",
