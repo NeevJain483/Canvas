@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { validate as isUuid } from "uuid";
 import { db } from "@repo/common/config";
 import { RequestWithUser } from "../types";
 import { verifyAccessToken } from "../middleware/verifyToken";
+import { asyncHandler } from "../middleware/asyncHandler";
+import { AppError } from "../utils/AppError";
+import { UUIDSchema } from "@repo/common/schema";
+import { ProjectModel } from "@repo/mongodb/model";
 
 const UserRouter = Router();
 
@@ -10,20 +13,30 @@ const UserRouter = Router();
 UserRouter.use(verifyAccessToken);
 
 // --- SEARCH USERS ---
-UserRouter.get("/search", async (req, res) => {
-  const { q } = req.query;
+UserRouter.get(
+  "/search",
+  asyncHandler(async (req: RequestWithUser, res) => {
+    const { q } = req.query;
 
-  if (!q || typeof q !== "string") {
-    return res.status(400).json({ message: "Search query is required." });
-  }
+    if (!q || typeof q !== "string" || q.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "A valid, non-empty search query parameter 'q' is required.",
+      });
+    }
 
-  try {
+    const currentUserId = req.user?.id;
     const users = await db.user.findMany({
       where: {
         username: {
-          contains: q,
+          contains: q.trim(),
           mode: "insensitive",
         },
+        ...(currentUserId && {
+          id: {
+            not: currentUserId,
+          },
+        }),
       },
       select: {
         id: true,
@@ -31,30 +44,26 @@ UserRouter.get("/search", async (req, res) => {
         first_name: true,
         last_name: true,
         profile_pic_url: true,
-        last_login: true,
       },
+      take: 20,
     });
 
-    return res.status(200).json({ data: users });
-  } catch (error) {
-    console.error("User search error:", error);
-    return res
-      .status(500)
-      .json({ message: "An error occurred while searching for users." });
-  }
-});
+    return res.status(200).json({
+      success: true,
+      data: users,
+    });
+  }),
+);
 
 // --- GET USER PROFILE ---
-UserRouter.get("/:id", async (req, res) => {
-  const { id } = req.params;
+UserRouter.get(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const validatedResult = UUIDSchema.parse(id);
 
-  if (!isUuid(id)) {
-    return res.status(400).json({ message: "Invalid user ID format." });
-  }
-
-  try {
     const user = await db.user.findUnique({
-      where: { id: String(id) },
+      where: { id: validatedResult.id },
       select: {
         id: true,
         username: true,
@@ -68,49 +77,50 @@ UserRouter.get("/:id", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      throw new AppError(`User with ID ${validatedResult.id} not found.`, 404);
     }
 
-    return res.status(200).json({ data: user });
-  } catch (error) {
-    console.error("Fetch user error:", error);
-    return res
-      .status(500)
-      .json({ message: "An error occurred while fetching the user profile." });
-  }
-});
+    // 4. Return clean, predictable payload structure
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  }),
+);
 
 // --- UPDATE USER ---
-UserRouter.put("/:id", async (req: RequestWithUser, res) => {
-  const { id } = req.params;
-  const updateData = req.body;
+UserRouter.put(
+  "/:id",
+  asyncHandler(async (req: RequestWithUser, res) => {
+    const { id } = req.params;
+    const updateData = req.body;
 
-  if (!isUuid(id)) {
-    return res.status(400).json({ message: "Invalid user ID format." });
-  }
+    const verifiedResult = UUIDSchema.parse({ id });
 
-  // Security: Prevent updating sensitive fields via this endpoint
-  const restrictedFields = ["password_hash", "id", "email", "email_verified"];
-  const containsRestricted = restrictedFields.some(
-    (field) => field in updateData,
-  );
+    const restrictedFields = ["password_hash", "id", "email", "email_verified"];
+    const containsRestricted = restrictedFields.some(
+      (field) => field in updateData,
+    );
 
-  if (containsRestricted) {
-    return res.status(403).json({
-      message:
+    if (containsRestricted) {
+      throw new AppError(
         "You are not permitted to update sensitive account fields through this endpoint.",
-    });
-  }
+        403,
+      );
+    }
 
-  if (!req.user || req.user.id !== id) {
-    return res
-      .status(403)
-      .json({ message: "You are not authorized to update this profile." });
-  }
+    if (!req.user || req.user.id !== id) {
+      throw new AppError("You are not authorized to update this profile.", 403);
+    }
+    // TODO: create UpdateUserSchema
+    // const validatedData = UpdateUserSchema.parse(req.body);
 
-  try {
+    // if (Object.keys(validatedData).length === 0) {
+    //   throw new AppError("Please provide at least one valid field to update.", 400);
+    // }
+
     const updatedUser = await db.user.update({
-      where: { id: String(id) },
+      where: { id: verifiedResult.id },
       data: updateData,
     });
 
@@ -118,92 +128,104 @@ UserRouter.put("/:id", async (req: RequestWithUser, res) => {
       message: "Profile updated successfully.",
       data: updatedUser,
     });
-  } catch (error: any) {
-    return res.status(500).json({ message: "Failed to update profile data." });
-  }
-});
+  }),
+);
 
 // --- GET USER PROJECTS ---
-UserRouter.get("/:id/projects", async (req, res) => {
-  const { id } = req.params;
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
+UserRouter.get(
+  "/:id/projects",
+  asyncHandler(async (req, res) => {
+    const { id: paramId } = req.params;
 
-  const skip = (page - 1) * limit;
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.max(1, Number(req.query.limit) || 10);
+    const skip = (page - 1) * limit;
 
-  if (!isUuid(id)) {
-    return res.status(400).json({ message: "Invalid user ID format." });
-  }
+    const validatedUserId = UUIDSchema.parse(paramId);
 
-  try {
-    const projects = await db.project.findMany({
-      skip: skip,
-      take: limit,
-      where: { owner_id: id },
-      orderBy: { created_at: "desc" },
-    });
+    const [projects, totalProjects, projectStats] = await Promise.all([
+      db.project.findMany({
+        skip,
+        take: limit,
+        where: { owner_id: validatedUserId.id },
+        orderBy: { created_at: "desc" },
+      }),
+      db.project.count({
+        where: { owner_id: validatedUserId.id },
+      }),
+      db.project.groupBy({
+        where: { owner_id: validatedUserId.id },
+        by: ["is_public"],
+        _count: { is_public: true },
+      }),
+    ]);
 
-    const total = await db.project.count({
-      where: { owner_id: id },
-    });
+    const publicCount =
+      projectStats.find((item) => item.is_public === true)?._count.is_public ||
+      0;
+    const privateCount =
+      projectStats.find((item) => item.is_public === false)?._count.is_public ||
+      0;
 
-    const state = await db.project.groupBy({
-      where: { owner_id: id },
-      by: ["is_public"],
-      _count: {
-        is_public: true,
-      },
-    });
-
-    const publicCount = state.find((item) => item.is_public === true)?._count.is_public || 0;
-    const privateCount = state.find((item) => item.is_public === false)?._count.is_public || 0;
-    
+    if (totalProjects === 0) {
+      const userExists = await db.user.findUnique({
+        where: { id: validatedUserId.id },
+      });
+      if (!userExists) {
+        throw new AppError(
+          `User with ID ${validatedUserId} does not exist.`,
+          404,
+        );
+      }
+    }
     return res.status(200).json({
-      projects,
+      success: true,
+      data: projects,
       meta: {
-        total,
+        total: totalProjects,
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(totalProjects / limit),
         publicCount,
         privateCount,
       },
     });
-  } catch (error) {
-    console.error("Database fetch error:", error); // Log the actual error internally for debugging
-    return res
-      .status(500)
-      .json({ message: "An error occurred while fetching projects." });
-  }
-});
+  }),
+);
 
 // --- DELETE USER ---
-UserRouter.delete("/:id", async (req: RequestWithUser, res) => {
-  const { id } = req.params;
+UserRouter.delete(
+  "/:id",
+  asyncHandler(async (req: RequestWithUser, res) => {
+    const { id: paramsId } = req.params;
+    const { id } = UUIDSchema.parse({ id: paramsId });
+    const owner_id = UUIDSchema.parse({ id: req.user?.id });
 
-  if (!isUuid(id)) {
-    return res.status(400).json({ message: "Invalid user ID format." });
-  }
-
-  if (!req.user || req.user.id !== id) {
-    return res
-      .status(403)
-      .json({ message: "You are not authorized to delete this account." });
-  }
-
-  try {
-    await db.user.delete({ where: { id } });
-    return res
-      .status(200)
-      .json({ message: "User account successfully deleted." });
-  } catch (error: any) {
-    if (error.code === "P2025") {
-      return res.status(404).json({ message: "User account not found." });
+    if (!req.user || owner_id.id !== id) {
+      throw new AppError("You are not authorized to delete this account.", 403);
     }
-    return res
-      .status(500)
-      .json({ message: "An error occurred while deleting the account." });
-  }
-});
+
+    const userProjects = await db.project.findMany({
+      where: { owner_id: id },
+      select: { id: true },
+    });
+    const projectIds = userProjects.map((p) => p.id);
+
+    if (projectIds.length > 0) {
+      await ProjectModel.deleteMany({ project_id: { $in: projectIds as `${string}-${string}-${string}-${string}-${string}`[] } });
+      await db.project.deleteMany({
+        where: { owner_id: id },
+      });
+    }
+    await db.user.delete({
+      where: { id: id },
+    });
+    return res.status(200).json({
+      success: true,
+      message:
+        "User account and all related project workspaces have been permanently purged.",
+    });
+  }),
+);
 
 export default UserRouter;

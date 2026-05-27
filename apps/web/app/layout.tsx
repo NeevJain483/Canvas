@@ -13,9 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body style={{ height: "100vh" }}>
-        {children}
-      </body>
+      <body style={{ height: "100vh" }}>{children}</body>
     </html>
   );
 }

@@ -17,6 +17,7 @@ import { RequestForForgetPassword, RequestWithUser } from "../types";
 import { generateVerificationCode, mailVerificationCode } from "../script";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { formatUserResponse, generateTokensAndSetCookie } from "../utils/auth";
+import { AppError } from "../utils/AppError";
 
 const AuthRouter = Router();
 const codes: Record<string, { code: number; expireIn: number }> = {};
@@ -26,38 +27,38 @@ AuthRouter.post(
   "/register",
   asyncHandler(async (req, res) => {
     const parsed = RegisterSchema.safeParse(req.body);
-    if (!parsed.success)
-      return res.status(400).json({ message: "Invalid registration data." });
+    if (!parsed.success) throw new AppError("Invalid registration data.", 400);
 
     const { username, email, password, first_name, last_name } = parsed.data;
+
+    const existingUser = await db.user.findFirst({
+      where: { OR: [{ email }, { username }] },
+    });
+
+    if (existingUser) {
+      throw new AppError(
+        "An account with that email or username already exists.",
+        409,
+      );
+    }
 
     const salt = await bcrypt.genSalt(12);
     const password_hash = await bcrypt.hash(password, salt);
 
-    try {
-      const user = await db.user.create({
-        data: { username, email, password_hash, first_name, last_name },
-      });
+    const user = await db.user.create({
+      data: { username, email, password_hash, first_name, last_name },
+    });
 
-      const { accessToken, refreshToken } = generateTokensAndSetCookie(
-        res,
-        user,
-      );
+    const { accessToken, refreshToken } = generateTokensAndSetCookie(res, user);
 
-      return res.status(201).json({
-        message: "Account created successfully.",
-        user: formatUserResponse(user),
-        accessToken,
-        refreshToken,
-        expiresIn: 900,
-      });
-    } catch (err: any) {
-      if (err.code === "P2002")
-        return res
-          .status(409)
-          .json({ message: "Username or email already exists." });
-      throw err;
-    }
+    return res.status(201).json({
+      success: true,
+      message: "Account created successfully.",
+      user: formatUserResponse(user),
+      accessToken,
+      refreshToken,
+      expiresIn: 900,
+    });
   }),
 );
 
@@ -66,19 +67,19 @@ AuthRouter.post(
   "/login",
   asyncHandler(async (req, res) => {
     const parsed = LoginSchema.safeParse(req.body);
-    if (!parsed.success)
-      return res.status(400).json({ message: "Invalid input format." });
+    if (!parsed.success) throw new AppError("Invalid input format.", 400);
 
     const { email, password } = parsed.data;
     const user = await db.user.findUnique({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-      return res.status(401).json({ message: "Invalid email or password." });
+      throw new AppError("Invalid email or password.", 401);
     }
 
     const { accessToken, refreshToken } = generateTokensAndSetCookie(res, user);
 
     return res.status(200).json({
+      success: true,
       message: "Login successful.",
       user: formatUserResponse(user),
       accessToken,
@@ -93,12 +94,13 @@ AuthRouter.post(
   "/forget-password",
   asyncHandler(async (req, res) => {
     const parsed = ForgetPasswordSchema.safeParse(req.body);
-    if (!parsed.success)
-      return res.status(400).json({ message: "Valid email is required." });
+    if (!parsed.success) {
+      throw new AppError("A valid email address is required.", 400);
+    }
 
     const { email } = parsed.data;
     const user = await db.user.findUnique({ where: { email } });
-    if (!user) return res.status(404).json({ message: "Account not found." });
+    if (!user) throw new AppError("Account not found", 404);
 
     const code = generateVerificationCode();
     await mailVerificationCode({ to: email }, code);
@@ -106,15 +108,25 @@ AuthRouter.post(
     codes[email] = { code, expireIn: Date.now() + 20 * 60 * 1000 };
 
     const secret = process.env.FORGET_PASSWORD_SECRET;
-    const token = jwt.sign({ email }, secret!, { expiresIn: "20m" });
+    if (!secret) {
+      throw new AppError(
+        "Internal Configuration Error: Missing Signature Secrets.",
+        500,
+      );
+    }
+
+    const token = jwt.sign({ email }, secret, { expiresIn: "20m" });
 
     res.cookie("draw-app-reset-password", token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
-    return res
-      .status(200)
-      .json({ message: "Verification code sent to your email." });
+
+    return res.status(200).json({
+      success: true,
+      message: "Verification code sent to your email.",
+    });
   }),
 );
 
@@ -130,11 +142,9 @@ AuthRouter.post(
       !email ||
       !codes[email] ||
       codes[email].code !== parseInt(code) ||
-      code[email].expireIn < Date.now()
+      codes[email].expireIn < Date.now()
     ) {
-      return res
-        .status(400)
-        .json({ message: "Invalid or expired verification code." });
+      throw new AppError("Invalid or expired verification code.", 400);
     }
 
     const salt = await bcrypt.genSalt(12);
@@ -143,7 +153,10 @@ AuthRouter.post(
     await db.user.update({ where: { email }, data: { password_hash } });
     delete codes[email];
 
-    return res.status(200).json({ message: "Password successfully updated." });
+    return res.status(200).json({
+      success: true,
+      message: "Password successfully updated.",
+    });
   }),
 );
 
@@ -152,7 +165,11 @@ AuthRouter.post(
   "/verify-email",
   verifyAccessToken,
   asyncHandler(async (req, res) => {
-    const { email, code } = VerifyEmailSchema.parse(req.body);
+    const parsed = VerifyEmailSchema.safeParse(req.body);
+    if (!parsed.success)
+      throw new AppError("Invalid email verification payload structure.", 400);
+
+    const { email, code } = parsed.data;
 
     if (!code) {
       const generatedCode = generateVerificationCode();
@@ -161,7 +178,9 @@ AuthRouter.post(
         code: generatedCode,
         expireIn: Date.now() + 20 * 60 * 1000,
       };
-      return res.status(200).json({ message: "Verification code sent." });
+      return res
+        .status(200)
+        .json({ success: true, message: "Verification code sent." });
     }
 
     const record = codes[email];
@@ -170,32 +189,46 @@ AuthRouter.post(
       record.code !== Number(code) ||
       Date.now() > record.expireIn
     ) {
-      return res.status(400).json({ message: "Invalid or expired code." });
+      throw new AppError("Invalid or expired code", 400);
     }
 
     await db.user.update({ where: { email }, data: { email_verified: true } });
     delete codes[email];
-    return res.status(200).json({ message: "Email verified successfully." });
+
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully.",
+    });
   }),
 );
 
 // --- LOGOUT & REFRESH ---
 AuthRouter.post("/logout", (req, res) => {
   res.clearCookie("draw-cookie");
-  return res.status(200).json({ message: "Logged out successfully." });
+  res.clearCookie("draw-app-reset-password"); // Keep cookie storage space completely empty
+  return res
+    .status(200)
+    .json({ success: true, message: "Logged out successfully." });
 });
 
 AuthRouter.post(
   "/refresh-token",
   verifyRefreshToken,
   asyncHandler(async (req: RequestWithUser, res) => {
-    const user = await db.user.findUnique({ where: { id: req.user?.id } });
-    if (!user) return res.status(404).json({ message: "User not found." });
+    const userId = req.user?.id;
+    if (!userId)
+      throw new AppError("Unauthorized session profile context.", 401);
+
+    const user = await db.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError("User not found", 404);
 
     const { accessToken } = generateTokensAndSetCookie(res, user);
-    return res
-      .status(200)
-      .json({ accessToken, expiresIn: 900, message: "Token refreshed." });
+    return res.status(200).json({
+      success: true,
+      accessToken,
+      expiresIn: 900,
+      message: "Token refreshed.",
+    });
   }),
 );
 

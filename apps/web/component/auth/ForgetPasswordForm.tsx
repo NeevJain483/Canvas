@@ -38,7 +38,7 @@ const ForgetPasswordForm = () => {
 
   if (success && success.status === 200) {
     setTimeout(() => {
-      clearMessage()
+      clearMessage();
       router.push(`/auth/reset-password`);
     }, 2000);
   }

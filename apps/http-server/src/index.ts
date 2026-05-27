@@ -2,7 +2,7 @@ import path from "path";
 import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -12,11 +12,11 @@ import UserRouter from "./router/userRouter";
 import { db, FRONTEND_URL } from "@repo/common/config";
 import ProjectRouter from "./router/projectRouter";
 
-import { ProjectModel,initailizeMongoDB } from "@repo/mongodb/model";
+import { ProjectModel, initailizeMongoDB } from "@repo/mongodb/model";
 
 (async () => {
   await initailizeMongoDB();
-})()
+})();
 
 const PORT = 4002;
 const app = express();
@@ -37,7 +37,7 @@ app.use("/api/v1/projects", ProjectRouter);
 app.get("/api/v1/ping", async (req, res) => {
   const status = {
     postgres: "Unknown",
-    mongodb: "Unknown"
+    mongodb: "Unknown",
   };
 
   try {
@@ -45,7 +45,7 @@ app.get("/api/v1/ping", async (req, res) => {
     status.postgres = "Healthy";
   } catch (error) {
     status.postgres = "Unhealthy";
-    console.log(error)
+    console.log(error);
   }
 
   try {
@@ -53,15 +53,27 @@ app.get("/api/v1/ping", async (req, res) => {
     status.mongodb = "Healthy";
   } catch (error) {
     status.mongodb = "Unhealthy";
-    console.log(error)
+    console.log(error);
   }
-  const isHealthy = status.postgres === "Healthy" && status.mongodb === "Healthy";
+  const isHealthy =
+    status.postgres === "Healthy" && status.mongodb === "Healthy";
   const statusCode = isHealthy ? 200 : 500;
 
   return res.status(statusCode).json({
     success: isHealthy,
-    message: isHealthy ? "All systems operational" : "One or more services are degraded",
-    services: status
+    message: isHealthy
+      ? "All systems operational"
+      : "One or more services are degraded",
+    services: status,
+  });
+});
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error("❌ Error caught globally:", err.message);
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+    errors: err.errors || undefined, 
   });
 });
 

@@ -36,8 +36,8 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
             gridAutoRows: "minmax(200px, auto)",
             rowGap: "6px",
             columnGap: "8px",
-            alignItems:"center",
-            justifyContent:"center"
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           {projects.map((el) => {

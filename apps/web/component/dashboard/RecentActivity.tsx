@@ -34,7 +34,8 @@ const RecentActivity = () => {
   return (
     <>
       <div className="recent-activity">
-        <button style={{height:"100%"}}
+        <button
+          style={{ height: "100%" }}
           onClick={() => router.push("/dashboard/projects/new")}
           className="recent-activity-card recent-activity-card-create-new"
         >
@@ -42,9 +43,7 @@ const RecentActivity = () => {
           <p>Create new 2D design</p>
         </button>
         {projects.map((el, idx) => {
-          return (
-            <ProjectCard key={idx} project={el}/>
-          );
+          return <ProjectCard key={idx} project={el} />;
         })}
       </div>
     </>

@@ -93,9 +93,7 @@ const Form: React.FC<FormType> = ({ type }) => {
             <div className="login-form-forget-password-button-container">
               <button
                 type="button"
-                onClick={() =>
-                  router.push(`/auth/forget-password`)
-                }
+                onClick={() => router.push(`/auth/forget-password`)}
               >
                 Forget&nbsp;Password?
               </button>

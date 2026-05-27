@@ -3,9 +3,9 @@ import React, { useRef, useEffect } from "react";
 import "./index.css";
 
 type SeekbarProps = {
-  value: number;              // actual size in px
-  max: number;                // max size for active tool
-  min: number;                // min size for active tool
+  value: number; // actual size in px
+  max: number; // max size for active tool
+  min: number; // min size for active tool
   onChange: (value: number) => void;
 };
 

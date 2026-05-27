@@ -22,31 +22,31 @@ const Toolbar = () => {
 
   return (
     <>
-      <div 
-        className="canvas-toolbar" 
-        style={{ 
-          display: "flex", 
-          gap: "6px", 
-          padding: "6px", 
-          backgroundColor: "#e9f4ff", 
-          borderRadius: "8px", 
+      <div
+        className="canvas-toolbar"
+        style={{
+          display: "flex",
+          gap: "6px",
+          padding: "6px",
+          backgroundColor: "#e9f4ff",
+          borderRadius: "8px",
           border: "1px solid #e2e8f0",
-          width: "fit-content"
+          width: "fit-content",
         }}
       >
-        <ToolButton 
-          onClick={() => setTool("eraser")} 
-          label={<CiEraser />} 
+        <ToolButton
+          onClick={() => setTool("eraser")}
+          label={<CiEraser />}
           isActive={currentTool === "eraser"}
         />
-        <ToolButton 
-          onClick={() => setTool("brush")} 
-          label={<FaBrush />} 
+        <ToolButton
+          onClick={() => setTool("brush")}
+          label={<FaBrush />}
           isActive={currentTool === "brush"}
         />
-        <ToolButton 
-          onClick={() => setTool("line")} 
-          label={<TbLine />} 
+        <ToolButton
+          onClick={() => setTool("line")}
+          label={<TbLine />}
           isActive={currentTool === "line"}
         />
         <ToolButton

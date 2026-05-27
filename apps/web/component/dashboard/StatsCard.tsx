@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import { FaStar } from "react-icons/fa";
 import { RiGitRepositoryPrivateLine } from "react-icons/ri";
@@ -13,14 +13,14 @@ const StatsCard = () => {
   const { total, publicCount, privateCount } = useProjectStore(
     useShallow((state) => ({
       total: state.totalProjects,
-      publicCount: state.publicProjects || 0, 
+      publicCount: state.publicProjects || 0,
       privateCount: state.privateProjects || 0,
     })),
   );
 
   const iconStyle = { transform: "translateY(-50%)" };
 
-  React.useEffect(()=>{},[total,publicCount,privateCount])
+  React.useEffect(() => {}, [total, publicCount, privateCount]);
 
   return (
     <>

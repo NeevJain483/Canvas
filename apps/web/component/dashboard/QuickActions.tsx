@@ -16,7 +16,6 @@ const QuickActions = () => {
   return (
     <section className="dashboard-layout-quick-actions">
       <form className="dashboard-layout-quick-actions-form">
-        
         <label>
           <input
             type="radio"

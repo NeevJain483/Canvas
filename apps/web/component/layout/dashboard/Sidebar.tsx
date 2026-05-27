@@ -13,7 +13,7 @@ const Sidebar = () => {
       <section className="dashboard-layout-sidebar-profile">
         <CgProfile
           size={96}
-          style={{cursor:"pointer"}}
+          style={{ cursor: "pointer" }}
           onClick={() => router.push("/dashboard/profile")}
         ></CgProfile>
         <p className="dashboard-layout-sidebar-profie-name">Name</p>

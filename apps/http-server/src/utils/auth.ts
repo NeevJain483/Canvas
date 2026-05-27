@@ -20,13 +20,13 @@ export const generateTokensAndSetCookie = (res: Response, user: any) => {
   const accessToken = jwt.sign(
     { username: user.username, id: user.id, email: user.email },
     ACCESS_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "15m" },
   );
 
   const refreshToken = jwt.sign(
     { id: user.id, username: user.username },
     REFRESH_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: "7d" },
   );
 
   res.cookie("draw-cookie", refreshToken, {

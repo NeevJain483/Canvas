@@ -4,7 +4,7 @@ import ForgetPasswordForm from "@component/auth/ForgetPasswordForm";
 const ForgetPassword = () => {
   return (
     <>
-      <ForgetPasswordForm/>
+      <ForgetPasswordForm />
     </>
   );
 };

@@ -9,7 +9,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function mailVerificationCode({ to }: { to: string }, code: number) {
+export async function mailVerificationCode(
+  { to }: { to: string },
+  code: number,
+) {
   const mailOptions = {
     from: `"Drawing app" <${process.env.EMAIL_ID}>`,
     to,

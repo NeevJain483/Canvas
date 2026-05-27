@@ -1,12 +1,12 @@
-import ProjectForm from '@component/projects/ProjectForm'
-import React from 'react'
+import ProjectForm from "@component/projects/ProjectForm";
+import React from "react";
 
 const page = () => {
   return (
     <>
-      <ProjectForm/>
+      <ProjectForm />
     </>
-  )
-}
+  );
+};
 
-export default page
+export default page;

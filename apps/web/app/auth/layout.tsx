@@ -12,8 +12,8 @@ export default function AuthLayout({
   return (
     <>
       <div className="auth-layout">
-          <Navbar></Navbar>
-          {children}
+        <Navbar></Navbar>
+        {children}
       </div>
     </>
   );

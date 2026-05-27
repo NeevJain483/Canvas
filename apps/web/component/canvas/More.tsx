@@ -85,7 +85,12 @@ const More: React.FC<MoreProps> = ({ canvasEngineRef }) => {
           }}
         >
           {EXPORT_FORMATS.map((format) => (
-              <OptionForMore key={format.id} onClick={() => handleExport(format.id)} format={format} icon={MdOutlineDownload}/>
+            <OptionForMore
+              key={format.id}
+              onClick={() => handleExport(format.id)}
+              format={format}
+              icon={MdOutlineDownload}
+            />
           ))}
           {/* <OptionForMore key={Math.random()} format={{iconColor:"#2563eb",label:"Save"}} onClick={()=>console.log("")} icon={FaSave}/> */}
         </div>

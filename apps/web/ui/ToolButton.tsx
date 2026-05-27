@@ -3,7 +3,7 @@ import React, { ButtonHTMLAttributes, ReactNode } from "react";
 interface ToolButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   label: ReactNode;
   onClick: () => void;
-  isActive?: boolean; 
+  isActive?: boolean;
 }
 
 const ToolButton: React.FC<ToolButtonProps> = ({

@@ -210,10 +210,10 @@ export const useProjectStore = create<ProjectStore>()(
 
         try {
           const response = await apiClient.delete(`/projects/${id}`);
-          console.log(response.data)
+          console.log(response.data);
           set((state) => {
             state.projectsLoading = false;
-            state.projects = get().projects.filter((el)=>el.id != id)
+            state.projects = get().projects.filter((el) => el.id != id);
           });
         } catch (error: any) {
           set((state) => {

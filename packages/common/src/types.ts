@@ -1,5 +1,13 @@
-import {z} from "zod"
-import { AuthResponseSchema, CreateProjectSchema, LoginSchema, ProjectDataSchema, RefreshTokenResponseSchema, RegisterSchema, UserSchema } from "./schema.js";
+import { z } from "zod";
+import {
+  AuthResponseSchema,
+  CreateProjectSchema,
+  LoginSchema,
+  ProjectDataSchema,
+  RefreshTokenResponseSchema,
+  RegisterSchema,
+  UserSchema,
+} from "./schema.js";
 export type UserType = z.infer<typeof UserSchema>;
 export type AuthResponseType = z.infer<typeof AuthResponseSchema>;
 export type RefreshTokenResponseType = z.infer<

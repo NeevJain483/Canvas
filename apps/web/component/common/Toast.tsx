@@ -46,13 +46,14 @@ const Toast = () => {
       )}
 
       {error && axios.isAxiosError(error) && (
-        <span className="message">{error.response?.data.message || error.message}</span>
+        <span className="message">
+          {error.response?.data.message || error.message}
+        </span>
       )}
 
       {success && (
         <span className="message">{success.message} Redirecting page.....</span>
       )}
-
     </Skeleton>
   );
 };

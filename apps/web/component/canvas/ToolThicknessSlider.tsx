@@ -27,7 +27,7 @@ const ToolThicknessSlider = () => {
       default:
         setMin(2);
         setMax(16);
-        setBrushSettings({brushSize:(min+max)/2})
+        setBrushSettings({ brushSize: (min + max) / 2 });
         break;
     }
   }, [currentTool]);
