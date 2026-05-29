@@ -5,7 +5,7 @@ import { immer } from "zustand/middleware/immer";
 export type ToolType =
   | "eraser" // Destination-out drawing
   | "brush" // Standard freehand
-  | "rect" // Shape: Rectangle
+  | "rectangle" // Shape: Rectangle
   | "ellipse" // Shape: Circle/Ellipse
   | "line"; // Shape: Straight line
 // | "pencil" // Hard-edged freehand
@@ -115,18 +115,10 @@ export const useCanvasStore = create<CanvasStoreType>()(
       },
       setBrushSettings(settings: Partial<BrushSettings>) {
         set((state) => {
-          state.brushSize = settings.brushSize
-            ? settings.brushSize
-            : state.brushSize;
-          state.brushOpacity = settings.brushOpacity
-            ? settings.brushOpacity
-            : state.brushOpacity;
-          state.brushHardness = settings.brushHardness
-            ? settings.brushHardness
-            : state.brushHardness;
-          state.currentColor = settings.currentColor
-            ? settings.currentColor
-            : state.currentColor;
+          state.brushSize = settings.brushSize ?? state.brushSize;
+          state.brushOpacity = settings.brushOpacity ?? state.brushOpacity;
+          state.brushHardness = settings.brushHardness ?? state.brushHardness;
+          state.currentColor = settings.currentColor ?? state.currentColor;
         });
       },
 

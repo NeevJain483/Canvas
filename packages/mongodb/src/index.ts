@@ -28,6 +28,7 @@ const ProjectSchema = new Schema<IProject>(
     project_id: {
       type: String,
       required: true,
+      unique: true,
     },
     baseImageUrl: {
       type: String,
@@ -43,12 +44,12 @@ const ProjectSchema = new Schema<IProject>(
     updatedBy: {
       type: String,
       required: true,
+      default:"System"
     },
   },
   {
     collection: "canvas_states",
     timestamps: false,
-    _id: false,
   },
 );
 

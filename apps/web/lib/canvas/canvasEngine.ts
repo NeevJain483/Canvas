@@ -18,12 +18,11 @@ export class CanvasEngine {
   }
 
   clearPreview() {
-    const dpr = window.devicePixelRatio || 1;
     this.previewCtx.clearRect(
       0,
       0,
-      this.previewCanvas.width / dpr,
-      this.previewCanvas.height / dpr,
+      this.previewCanvas.width,
+      this.previewCanvas.height,
     );
   }
 

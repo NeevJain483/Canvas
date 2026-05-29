@@ -28,8 +28,8 @@ const Page = () => {
   useEffect(() => {
     if (!user) return;
     handleFetch(currentPage);
-  }, [user]); // Only depend on user profile sessions to trigger initial data hydration
-
+  }, [user]);
+  
   return (
     <>
       <ProjectGrid

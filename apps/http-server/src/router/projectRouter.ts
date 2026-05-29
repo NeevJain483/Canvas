@@ -6,6 +6,7 @@ import { RequestWithUser } from "../types";
 import { ProjectModel } from "@repo/mongodb/model";
 import { UUID } from "@repo/common/types";
 import { asyncHandler } from "../middleware/asyncHandler";
+import { AppError } from "../utils/AppError";
 
 const ProjectRouter = Router();
 
@@ -56,7 +57,6 @@ ProjectRouter.post(
         })),
       });
     }
-
     const data = parsedData.data;
     const userId = req.user?.id;
 
@@ -68,11 +68,15 @@ ProjectRouter.post(
       data: { ...data, owner_id: userId },
     });
 
-    await ProjectModel.create({
-      project_id: createdPostgresProject.id as UUID,
-      updatedBy: userId,
-      strokes: [],
-    });
+    try {
+      await ProjectModel.create({
+        project_id: createdPostgresProject.id as UUID,
+        updatedBy: userId,
+        strokes: [],
+      });
+    } catch (error) {
+      console.log(error);
+    }
 
     return res.status(201).json({
       success: true,
@@ -90,15 +94,8 @@ ProjectRouter.get(
     const { id } = req.params;
 
     const parsed = UUIDSchema.safeParse({ id });
-    if (!parsed.success) {
-      return res.status(400).json({
-        message: "Invalid UUID format requested",
-        errors: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
-    }
+    if (!parsed.success)
+      throw new AppError("Invalid UUID format requested", 400);
 
     const projectId = parsed.data.id;
 
@@ -109,16 +106,24 @@ ProjectRouter.get(
       ProjectModel.findOne({ project_id: projectId }),
     ]);
 
-    if (!projectMetadata) {
-      return res.status(404).json({
-        message: `Project with ID ${projectId} not found`,
+    if (!projectMetadata)
+      throw new AppError(`Project with ID ${projectId} not found`, 404);
+
+    let newCanvasState;
+    if (!projectCanvasState) {
+      newCanvasState = await ProjectModel.create({
+        project_id: projectMetadata.id as UUID,
+        baseImageUrl: "",
+        strokes: [],
+        updatedBy: "System",
+        lastUpdated: Date.now(),
       });
     }
 
     return res.status(200).json({
       message: "Project details retrieved successfully",
       project: projectMetadata,
-      canvasState: projectCanvasState,
+      canvasState: projectCanvasState ?? newCanvasState,
     });
   }),
 );

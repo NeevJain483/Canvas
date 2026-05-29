@@ -55,9 +55,9 @@ const Toolbar = () => {
           isActive={currentTool === "ellipse"}
         />
         <ToolButton
-          onClick={() => setTool("rect")}
+          onClick={() => setTool("rectangle")}
           label={<RiRectangleLine />}
-          isActive={currentTool === "rect"}
+          isActive={currentTool === "rectangle"}
         />
         {/* <ToolButton onClick={() => setTool("pen")} label={<FaPenFancy />} isActive={currentTool === "pen"} /> */}
         {/* <ToolButton onClick={() => setTool("pencil")} label={<FaPencil />} isActive={currentTool === "pencil"} /> */}

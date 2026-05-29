@@ -10,7 +10,7 @@ export const TOOL_PROPERTIES: Record<ToolType, ToolProperty> = {
   eraser: { cursor: "cell", requiresPreview: false, canDraw: true },
   brush: { cursor: "crosshair", requiresPreview: false, canDraw: true },
   line: { cursor: "crosshair", requiresPreview: true, canDraw: true },
-  rect: { cursor: "crosshair", requiresPreview: true, canDraw: true },
+  rectangle: { cursor: "crosshair", requiresPreview: true, canDraw: true },
   ellipse: { cursor: "crosshair", requiresPreview: true, canDraw: true },
   // pen: { cursor: "default", requiresPreview: false, canDraw: true },
   // pencil: { cursor: "crosshair", requiresPreview: false, canDraw: true },
@@ -26,7 +26,7 @@ export interface Point {
 }
 
 export const ToolLogic = {
-  rect: (ctx: CanvasRenderingContext2D, start: Point, end: Point) => {
+  rectangle: (ctx: CanvasRenderingContext2D, start: Point, end: Point) => {
     ctx.beginPath();
     ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
     ctx.stroke();
@@ -37,8 +37,21 @@ export const ToolLogic = {
     const originalComposite = ctx.globalCompositeOperation;
     ctx.globalCompositeOperation = "destination-out";
 
-    ctx.quadraticCurveTo(start.x, start.y, end.x, end.y);
-    ctx.stroke();
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+
+    if (dx === 0 && dy === 0) {
+      ctx.beginPath();
+      ctx.arc(start.x, start.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.closePath();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y);
+      ctx.quadraticCurveTo(start.x, start.y, end.x, end.y);
+      ctx.stroke();
+      ctx.closePath();
+    }
 
     ctx.globalCompositeOperation = originalComposite;
   },

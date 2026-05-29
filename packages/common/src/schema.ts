@@ -108,3 +108,71 @@ export const UserProjectResonseSchema = z.object({
 export const ProjectResponseSchema = z.object({
   projects: z.array(ProjectDataSchema),
 });
+
+export const PointSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
+
+export const BrushStrokeSchema = z.object({
+  type: z.literal("brush"),
+  color: z.string(),
+  width: z.number(),
+  points: z.array(PointSchema),
+});
+export const EraserStrokeSchema = z.object({
+  type: z.literal("eraser"),
+  color: z.string().optional(),
+  width: z.number(),
+  points: z.array(PointSchema),
+});
+
+export const LineStrokeSchema = z.object({
+  type: z.literal("line"),
+  color: z.string(),
+  width: z.number(),
+  start_x: z.number(),
+  start_y: z.number(),
+  last_x: z.number(),
+  last_y: z.number(),
+});
+
+export const RectangleStrokeSchema = z.object({
+  type: z.literal("rectangle"),
+  color: z.string(),
+  width: z.number(),
+  start_x: z.number(),
+  start_y: z.number(),
+  last_x: z.number(),
+  last_y: z.number(),
+});
+export const EllipseStrokeSchema = z.object({
+  type: z.literal("ellipse"),
+  color: z.string(),
+  width: z.number(),
+  start_x: z.number(),
+  start_y: z.number(),
+  last_x: z.number(),
+  last_y: z.number(),
+});
+
+export const CanvasElementSchema = z.discriminatedUnion("type", [
+  BrushStrokeSchema,
+  EraserStrokeSchema,
+  LineStrokeSchema,
+  RectangleStrokeSchema,
+  EllipseStrokeSchema,
+]);
+
+export const CanvasStateSchema = z.object({
+  project_id: z.string() as z.ZodType<UUID>,
+  baseImageUrl: z.string().nullable(),
+  strokes: z.array(CanvasElementSchema),
+  lastUpdated: z.string(),
+  updatedBy: z.string(),
+});
+
+export const CurrentProjectSchema = z.object({
+  project: ProjectDataSchema,
+  canvasState: CanvasStateSchema,
+});

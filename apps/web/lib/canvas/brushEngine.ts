@@ -54,8 +54,8 @@ export class BrushEngine {
       case "line":
         ToolLogic.line(ctx, start, end);
         break;
-      case "rect":
-        ToolLogic.rect(ctx, start, end);
+      case "rectangle":
+        ToolLogic.rectangle(ctx, start, end);
         break;
       case "ellipse":
         ToolLogic.ellipse(ctx, start, end);

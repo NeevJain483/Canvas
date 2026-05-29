@@ -141,8 +141,7 @@ UserRouter.get(
     const limit = Math.max(1, Number(req.query.limit) || 10);
     const skip = (page - 1) * limit;
 
-    const validatedUserId = UUIDSchema.parse(paramId);
-
+    const validatedUserId = UUIDSchema.parse({id:paramId});
     const [projects, totalProjects, projectStats] = await Promise.all([
       db.project.findMany({
         skip,
@@ -159,6 +158,8 @@ UserRouter.get(
         _count: { is_public: true },
       }),
     ]);
+
+    console.log(projects)
 
     const publicCount =
       projectStats.find((item) => item.is_public === true)?._count.is_public ||
@@ -180,7 +181,7 @@ UserRouter.get(
     }
     return res.status(200).json({
       success: true,
-      data: projects,
+      projects: projects,
       meta: {
         total: totalProjects,
         page,

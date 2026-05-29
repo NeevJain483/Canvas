@@ -10,6 +10,7 @@ import { useShallow } from "zustand/shallow";
 import ToolSetting from "@component/canvas/ToolSetting";
 import More from "@component/canvas/More";
 import { useProjectStore } from "@lib/store/projectStore";
+import { loadCanvas } from "@lib/utils";
 
 export const DrawingCanvas = () => {
   const { setFullScreenMode, fullScreenMode } = useCanvasStore(
@@ -26,8 +27,10 @@ export const DrawingCanvas = () => {
 
   useEffect(() => {
     if (!currentProject || !canvasRef.current || !previewRef.current) return;
+    const tempCtx = canvasRef.current.getContext("2d");
+    if (!tempCtx) return;
 
-    const { width, height } = currentProject;
+    const { width, height } = currentProject.project;
 
     if (
       canvasRef.current.width !== width ||
@@ -39,6 +42,8 @@ export const DrawingCanvas = () => {
       previewRef.current.width = width;
       previewRef.current.height = height;
     }
+
+    loadCanvas(tempCtx, currentProject);
   }, [currentProject, canvasRef, previewRef]);
 
   return (

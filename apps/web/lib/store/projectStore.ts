@@ -1,14 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { CreateProjectType, ProjectDataType, UUID } from "@repo/common/types";
+import {
+  CreateProjectType,
+  CurrentProjectType,
+  ProjectDataType,
+  UUID,
+} from "@repo/common/types";
 import apiClient from "@lib/api/client";
 import {
   UUIDSchema,
   CreateProjectSchema,
   ProjectResponseSchema,
-  ProjectDataSchema,
   UserProjectResonseSchema,
+  CurrentProjectSchema,
 } from "@repo/common/schema";
 
 interface FilterOptions {
@@ -18,7 +23,7 @@ interface FilterOptions {
 interface ProjectStore {
   // project data
   projects: ProjectDataType[];
-  currentProject: ProjectDataType | null;
+  currentProject: CurrentProjectType | null;
   projectsLoading: boolean;
   projectError: null | any;
 
@@ -50,7 +55,7 @@ interface ProjectStore {
     filters?: FilterOptions,
   ): Promise<void>;
   fetchProjectById(id: UUID, data: Partial<ProjectDataType>): Promise<void>;
-  setCurrentProject(project: ProjectDataType): void;
+  setCurrentProject(project: CurrentProjectType): void;
 
   // CRUD Actions
   createProject(data: CreateProjectType): Promise<UUID>;
@@ -59,7 +64,7 @@ interface ProjectStore {
   // duplicateProject(id: UUID): Promise<UUID>;
 
   // Save Actions
-  // saveProject(force?: boolean): Promise<void>;
+  saveProject(force?: boolean): Promise<void>;
   // autoSave(): Promise<void>;
   // discardChanges(): void;
 
@@ -137,7 +142,7 @@ export const useProjectStore = create<ProjectStore>()(
           );
           set((state) => {
             state.projectsLoading = false;
-            state.projects = projects;
+            state.projects = projects || [];
             state.totalProjects = meta.total;
             state.publicProjects = meta.publicCount;
             state.privateProjects = meta.privateCount;
@@ -156,21 +161,21 @@ export const useProjectStore = create<ProjectStore>()(
           state.projectsLoading = true;
         });
         try {
-          const verifiedData = UUIDSchema.parse({ id: id as UUID });
-          const response = await apiClient.get(`/projects/${verifiedData.id}`);
-          const project = ProjectDataSchema.parse(response.data.project);
+          const verifiedId = UUIDSchema.parse({ id: id as UUID });
+          const response = await apiClient.get(`/projects/${verifiedId.id}`);
+          const verifiedData = CurrentProjectSchema.parse(response.data);
           set((state) => {
-            state.currentProject = project;
+            state.currentProject = verifiedData;
             state.projectsLoading = false;
           });
-        } catch (error) {
+        } catch (error: any) {
           set((state) => {
             state.projectError = error;
             state.projectsLoading = false;
           });
         }
       },
-      setCurrentProject: (project: ProjectDataType) => {
+      setCurrentProject: (project: CurrentProjectType) => {
         set((state) => {
           state.projectsLoading = true;
           state.currentProject = project;
@@ -222,13 +227,23 @@ export const useProjectStore = create<ProjectStore>()(
           });
         }
       },
+      // Save Action
+      saveProject: async (force?: boolean) => {
+        set((state) => {
+          state.projectsLoading = true;
+        });
+        try {
+          await apiClient.put(``, {});
+        } catch (error) {
+          console.log(error);
+        }
+        set((state) => {
+          state.projectsLoading = false;
+        });
+      },
     })),
     {
       name: "project-store",
-      partialize: (state) => ({
-        projects: state.projects,
-        currentProject: state.currentProject,
-      }),
     },
   ),
 );

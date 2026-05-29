@@ -4,7 +4,7 @@ import { useCanvasStore } from "@lib/store/canvasStore";
 
 const ToolThicknessSlider = () => {
   const [min, setMin] = useState<number>(2);
-  const [max, setMax] = useState<number>(20);
+  const [max, setMax] = useState<number>(48);
 
   const brushSize = useCanvasStore((state) => state.brushSize);
   const currentTool = useCanvasStore((state) => state.currentTool);
@@ -18,19 +18,18 @@ const ToolThicknessSlider = () => {
   };
 
   useEffect(() => {
-    switch (currentTool) {
-      case "brush":
-        setMin(2);
-        setMax(48);
-        break;
-
-      default:
-        setMin(2);
-        setMax(16);
-        setBrushSettings({ brushSize: (min + max) / 2 });
-        break;
+    if (currentTool === "brush") {
+      setMin(2);
+      setMax(48);
+    } else {
+      setMin(2);
+      setMax(16);
+      // Clamp brush size to new max if needed
+      if (brushSize > 16) {
+        setBrushSettings({ brushSize: 16 });
+      }
     }
-  }, [currentTool]);
+  }, [currentTool, brushSize, setBrushSettings]);
 
   return (
     <div
@@ -58,7 +57,7 @@ const ToolThicknessSlider = () => {
         type="range"
         min={min}
         max={max}
-        value={brushSize || (min + max) / 2}
+        value={brushSize || 8}
         onChange={handleSliderChange}
         style={{
           cursor: "pointer",

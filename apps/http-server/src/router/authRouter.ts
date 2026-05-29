@@ -205,7 +205,7 @@ AuthRouter.post(
 // --- LOGOUT & REFRESH ---
 AuthRouter.post("/logout", (req, res) => {
   res.clearCookie("draw-cookie");
-  res.clearCookie("draw-app-reset-password"); // Keep cookie storage space completely empty
+  res.clearCookie("draw-app-reset-password");
   return res
     .status(200)
     .json({ success: true, message: "Logged out successfully." });

@@ -4,6 +4,7 @@ import { MdOutlineExpandMore, MdOutlineDownload } from "react-icons/md";
 import { ExportFormat, ExportUtils } from "@lib/canvas/export";
 import { MoreBtn, OptionForMore } from "@ui/MoreBtn";
 import { FaSave } from "react-icons/fa";
+import { useProjectStore } from "@lib/store/projectStore";
 
 interface FormatOption {
   id: ExportFormat;
@@ -24,6 +25,7 @@ interface MoreProps {
 const More: React.FC<MoreProps> = ({ canvasEngineRef }) => {
   const [toggle, setToggle] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const saveProject = useProjectStore((state) => state.saveProject);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -92,7 +94,12 @@ const More: React.FC<MoreProps> = ({ canvasEngineRef }) => {
               icon={MdOutlineDownload}
             />
           ))}
-          {/* <OptionForMore key={Math.random()} format={{iconColor:"#2563eb",label:"Save"}} onClick={()=>console.log("")} icon={FaSave}/> */}
+          <OptionForMore
+            key={Math.random()}
+            format={{ iconColor: "#2563eb", label: "Save" }}
+            onClick={() => saveProject()}
+            icon={FaSave}
+          />
         </div>
       )}
     </div>

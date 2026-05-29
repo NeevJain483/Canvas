@@ -5,6 +5,9 @@ import { useCanvasStore } from "@lib/store/canvasStore";
 import { CanvasEngine } from "@lib/canvas/canvasEngine";
 import { TOOL_PROPERTIES, ToolLogic } from "@lib/canvas/tools";
 import { BrushEngine } from "@lib/canvas/brushEngine";
+import { useProjectStore } from "@lib/store/projectStore";
+import { updateCurrentProject } from "@lib/utils";
+import { CanvasElementType } from "@repo/common/types";
 
 export function useCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -16,12 +19,24 @@ export function useCanvas() {
   const lastPoint = useRef<{ x: number; y: number } | null>(null);
   const currentPoint = useRef<{ x: number; y: number } | null>(null);
 
+  const currentProject = useProjectStore((state) => state.currentProject);
+  const setCurrentProject = useProjectStore((state) => state.setCurrentProject);
+  const currentProjectRef = useRef(currentProject);
+  const setCurrentProjectRef = useRef(setCurrentProject);
+  
   const currentTool = useCanvasStore((state) => state.currentTool);
   const currentToolRef = useRef(currentTool);
+
+  const pointsRef = useRef<{ x: number; y: number }[]>([]);
 
   useEffect(() => {
     currentToolRef.current = currentTool;
   }, [currentTool]);
+
+  useEffect(() => {
+    currentProjectRef.current = currentProject;
+    setCurrentProjectRef.current = setCurrentProject;
+  }, [currentProject, setCurrentProject]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -92,6 +107,10 @@ export function useCanvas() {
         mainCtx.beginPath();
         mainCtx.moveTo(x, y);
       }
+
+      if (activeTool === "brush" || activeTool === "eraser") {
+        pointsRef.current = [{ x, y }];
+      }
     };
 
     const handleMove = (e: PointerEvent) => {
@@ -125,9 +144,11 @@ export function useCanvas() {
               state.brushSize,
               state.brushHardness,
             );
+            pointsRef.current.push({ x, y });
             break;
           case "eraser":
             ToolLogic.eraser(mainCtx, lastPoint.current, { x, y });
+            pointsRef.current.push({ x, y });
             break;
         }
         lastPoint.current = { x, y };
@@ -135,6 +156,7 @@ export function useCanvas() {
     };
 
     const handleUp = (e: PointerEvent) => {
+      const state = useCanvasStore.getState();
       const activeTool = currentToolRef.current;
 
       if (!isDrawing.current) return;
@@ -148,6 +170,11 @@ export function useCanvas() {
 
       if (!TOOL_PROPERTIES[activeTool].canDraw || !mainCtx) return;
 
+      const startX = lastPoint.current?.x || 0;
+      const startY = lastPoint.current?.y || 0;
+      const endX = currentPoint.current?.x || 0;
+      const endY = currentPoint.current?.y || 0;
+
       if (
         TOOL_PROPERTIES[activeTool].requiresPreview &&
         lastPoint.current &&
@@ -156,22 +183,63 @@ export function useCanvas() {
         brush.applyBrushState(mainCtx);
         mainCtx.beginPath();
 
-        const startX = lastPoint.current.x;
-        const startY = lastPoint.current.y;
-        const endX = currentPoint.current.x;
-        const endY = currentPoint.current.y;
-
         engine.commitPreviewToMain((ctx) => {
           brush.drawPreviewShape(activeTool, ctx, startX, startY, endX, endY);
         });
       } else {
+        if (activeTool === "brush" && pointsRef.current.length === 1) {
+          const point = pointsRef.current[0]!;
+          ToolLogic.brush(
+            mainCtx,
+            point,
+            point,
+            state.brushSize,
+            state.brushHardness,
+          );
+        }
+
+        if (activeTool === "eraser" && pointsRef.current.length === 1) {
+          const point = pointsRef.current[0]!;
+          ToolLogic.eraser(mainCtx, point, point);
+        }
+
         mainCtx.closePath();
       }
 
       engine.clearPreview();
-
+      if (!currentProjectRef.current) return;
+      if (activeTool === "brush") {
+        updateCurrentProject(currentProjectRef.current, setCurrentProjectRef.current, {
+          type: "brush",
+          color: state.currentColor,
+          width: state.brushSize,
+          points: [...pointsRef.current],
+        });
+      } else if (activeTool === "eraser") {
+        updateCurrentProject(currentProjectRef.current, setCurrentProjectRef.current, {
+          type: "eraser",
+          width: state.brushSize,
+          points: [...pointsRef.current],
+        });
+      } else if (
+        activeTool === "line" ||
+        activeTool === "rectangle" ||
+        activeTool === "ellipse"
+      ) {
+        updateCurrentProject(currentProjectRef.current, setCurrentProjectRef.current, {
+          type: activeTool,
+          color: state.currentColor,
+          width: state.brushSize,
+          start_x: startX,
+          start_y: startY,
+          last_x: endX,
+          last_y: endY,
+        } as CanvasElementType);
+      }
+      pointsRef.current = [];
       lastPoint.current = null;
       currentPoint.current = null;
+      console.log(currentProjectRef.current.canvasState)
     };
 
     preview.addEventListener("pointerdown", handleDown);
@@ -183,7 +251,7 @@ export function useCanvas() {
       window.removeEventListener("pointermove", handleMove);
       window.removeEventListener("pointerup", handleUp);
     };
-  }, [canvasRef, previewRef]);
+  }, []);
 
   return { canvasRef, previewRef, canvasEngineRef };
 }
