@@ -27,12 +27,11 @@ export class CanvasEngine {
   }
 
   clearMain() {
-    const dpr = window.devicePixelRatio || 1;
     this.mainCtx.clearRect(
       0,
       0,
-      this.mainCanvas.width / dpr,
-      this.mainCanvas.height / dpr,
+      this.mainCanvas.width,
+      this.mainCanvas.height,
     );
   }
 

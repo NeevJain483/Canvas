@@ -44,7 +44,7 @@ export const DrawingCanvas = () => {
     }
 
     loadCanvas(tempCtx, currentProject);
-  }, [currentProject, canvasRef, previewRef]);
+  }, [currentProject?.project.id, canvasRef, previewRef]);
 
   return (
     <>
