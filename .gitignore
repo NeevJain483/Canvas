@@ -41,3 +41,4 @@ plan.md
 log.md
 
 apps/web2.0
+.env.local.docker

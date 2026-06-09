@@ -25,7 +25,7 @@ const Main: React.FC<Input> = ({ id }) => {
     })();
   }, [fetchProjectById, id]);
 
-  if (user?.id == currentProject?.owner_id) {
+  if (user?.id == currentProject?.project.owner_id) {
     console.log("ower");
   }
 
