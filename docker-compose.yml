@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  postgres-db:
+    image: postgres:18-alpine
+    container_name: canvas-postgres
+    restart: always
+    env_file:
+      - .env.local.docker
+    # For control from localhost side
+    # ports:
+    #   - "5432:5432" 
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - canvas-network
+
+  mongo-db:
+    image: mongo:latest
+    container_name: canvas-mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    env_file:
+      - .env.local.docker
+    # For control from localhost side
+    # ports:
+    #   - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - canvas-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/Dockerfile.backend
+    container_name: canvas-backend
+    restart: always
+    ports:
+      - "4002:4002"
+    env_file:
+      - .env.local.docker
+    depends_on:
+      - postgres-db
+      - mongo-db
+    networks:
+      - canvas-network
+    command: sh -c "npm run db:push && npm run start:backend"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/Dockerfile.frontend
+    container_name: canvas-frontend
+    restart: always
+    ports:
+      - "3002:3002"
+    env_file:
+      - .env.local.docker
+    depends_on:
+      - postgres-db
+      - mongo-db
+    networks:
+      - canvas-network
+
+volumes:
+  postgres_data:
+  mongo_data:
+
+networks:
+  canvas-network:
+    driver: bridge
