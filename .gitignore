@@ -42,3 +42,4 @@ log.md
 
 web2.0
 .env.local.docker
+docker-compose.vm.yml

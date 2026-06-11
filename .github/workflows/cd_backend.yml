@@ -19,4 +19,6 @@ jobs:
             context: .
             file: ./dockerfiles/Dockerfile.backend
             push: true
-            tags: neevdevs/canvas-app-backend:${{secrets.sha}}
+            tags: | 
+                neevdevs/canvas-app-backend:${{secrets.sha}}
+                neevdevs/canvas-app-backend:latest
