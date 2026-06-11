@@ -29,5 +29,5 @@ jobs:
           file: ./dockerfiles/Dockerfile.frontend
           push: true
           tags: |
-            neev482/canvas-frontend:${{github.sha}}
-            neev482/canvas-frontend:latest
+            neev480/canvas-frontend:${{github.sha}}
+            neev480/canvas-frontend:latest
