@@ -16,9 +16,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-            context: .
-            file: ./dockerfiles/Dockerfile.backend
-            push: true
-            tags: | 
-                neevdevs/canvas-app-backend:${{secrets.sha}}
-                neevdevs/canvas-app-backend:latest
+          context: .
+          file: ./dockerfiles/Dockerfile.backend
+          push: true
+          tags: |
+            neevdevs/canvas-app-backend:${{github.sha}}
+            neevdevs/canvas-app-backend:latest
