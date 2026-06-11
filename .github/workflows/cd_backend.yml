@@ -20,5 +20,5 @@ jobs:
           file: ./dockerfiles/Dockerfile.backend
           push: true
           tags: |
-            neevdevs/canvas-app-backend:${{github.sha}}
-            neevdevs/canvas-app-backend:latest
+            neev480/canvas-backend:${{github.sha}}
+            neev480/canvas-backend:latest
