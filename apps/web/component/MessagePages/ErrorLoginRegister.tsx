@@ -72,6 +72,7 @@ const ErrorLoginRegisterPage = ({ type }: { type: "login" | "register" }) => {
         </button>
         <Link
           href={type === "login" ? "/auth/reset-password" : "/auth/login"}
+          onClick={() => clearError()}
           className="w-full p-2 border-2 border-primary text-primary rounded-sm text-[14px] tracking-tight flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all duration-300"
         >
           {" "}

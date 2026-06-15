@@ -2,7 +2,6 @@
 import Loading from "@component/common/Loading";
 import { useAuthStore } from "@lib/store/authStore";
 import React from "react";
-// import "@style/component/layout/auth/index.css";
 
 export default function AuthLayout({
   children,

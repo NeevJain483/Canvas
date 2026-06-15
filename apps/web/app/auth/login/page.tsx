@@ -1,10 +1,10 @@
 "use client";
 
 import Loading from "@component/common/Loading";
-import ErrorGeneral from "@component/errorPages/ErrorGeneral";
-import ErrorLoginRegister from "@component/errorPages/ErrorLoginRegister";
+import ErrorLoginRegister from "@component/MessagePages/ErrorLoginRegister";
+import SuccessLoginRegister from "@component/MessagePages/SuccessAuth";
 import { useAuthStore } from "@lib/store/authStore";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { useShallow } from "zustand/shallow";
 
@@ -13,9 +13,8 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const router = useRouter();
 
-  const { login, isLoading, error, success, clearMessage } = useAuthStore(
+  const { login, isLoading, error, success } = useAuthStore(
     useShallow((state) => ({
       login: state.login,
       register: state.register,
@@ -37,16 +36,10 @@ const Login = () => {
   if (isLoading) return <Loading />;
 
   if (success) {
-    if (success.status === 200) {
-      setTimeout(() => {
-        clearMessage();
-        router.push(`/dashboard`);
-      }, 2000);
-    }
+    return <SuccessLoginRegister type={"login"} />;
   }
 
   if (error) {
-    return <ErrorGeneral />
     return <ErrorLoginRegister type="login" />;
   }
 
@@ -81,26 +74,44 @@ const Login = () => {
               Enter your credentials to access your studio.
             </p>
           </header>
-          <form className="space-y-lg" onSubmit={handleSubmit}>
-            <input
-              className="w-full h-12 px-md input-gradient border border-outline/20 rounded-lg text-on-surface outline-none"
-              placeholder="Email"
-              type="email"
-              name="email"
-              value={data.email}
-              onChange={handleOnChange}
-            />
-            <input
-              className="w-full h-12 px-md input-gradient border border-outline/20 rounded-lg text-on-surface outline-none"
-              placeholder="Password"
-              type="password"
-              name="password"
-              value={data.password}
-              onChange={handleOnChange}
-            />
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="text-[14px] uppercase text-on-surface-variant font-mono font-semibold">
+                Email
+              </label>
+              <input
+                className="w-full h-12 px-md input-gradient border border-outline/20 rounded-lg text-on-surface outline-none"
+                placeholder="Email"
+                type="email"
+                name="email"
+                value={data.email}
+                onChange={handleOnChange}
+              />
+            </div>
+            <div>
+              <label className="text-[14px] uppercase text-on-surface-variant font-mono font-semibold">
+                Password
+              </label>
+              <input
+                className="w-full h-12 px-md input-gradient border border-outline/20 rounded-lg text-on-surface outline-none"
+                placeholder="Password"
+                type="password"
+                name="password"
+                value={data.password}
+                onChange={handleOnChange}
+              />
+              <div className="w-full flex justify-end">
+                <Link
+                  href={"/auth/forget-password"}
+                  className="text-end text-on-surface-variant font-semibold font-mono hover:text-primary-fixed"
+                >
+                  Forget Password?
+                </Link>
+              </div>
+            </div>
             <button
               type="submit"
-              className="w-full h-14 bg-primary-container text-on-primary font-headline-md rounded-lg neon-glow"
+              className="w-full h-14 bg-primary-container text-on-primary font-headline-md rounded-lg neon-glow hover:scale-[1.05] transition-all duration-300"
             >
               Login
             </button>
@@ -108,7 +119,12 @@ const Login = () => {
           <footer className="mt-xl text-center">
             <p className="font-body-md text-body-md text-on-surface-variant">
               Don&#39;t have an account?{" "}
-              <a className="text-primary-container">Create workspace</a>
+              <Link
+                href={"/auth/register"}
+                className="text-primary-container hover:underline"
+              >
+                Create workspace
+              </Link>
             </p>
           </footer>
         </div>

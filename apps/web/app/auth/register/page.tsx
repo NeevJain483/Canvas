@@ -2,11 +2,10 @@
 import React, { useState } from "react";
 import { useShallow } from "zustand/shallow";
 import { useAuthStore } from "@lib/store/authStore";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Loading from "@component/common/Loading";
-import ErrorPage from "@component/errorPages/ErrorLoginRegister";
-import ErrorLoginRegisterPage from "@component/errorPages/ErrorLoginRegister";
+import ErrorLoginRegisterPage from "@component/MessagePages/ErrorLoginRegister";
+import SuccessLoginRegister from "@component/MessagePages/SuccessAuth";
 
 const Register = () => {
   const [data, setData] = useState<{
@@ -15,9 +14,7 @@ const Register = () => {
     password: string;
   }>({ username: "", email: "", password: "" });
 
-  const router = useRouter()
-
-  const { register, isLoading, success, clearMessage, error } = useAuthStore(
+  const { register, isLoading, success, error } = useAuthStore(
     useShallow((state) => ({
       login: state.login,
       register: state.register,
@@ -28,24 +25,20 @@ const Register = () => {
     })),
   );
 
-  if(isLoading)return <Loading/>
+  if (isLoading) return <Loading />;
 
   if (success) {
-    if (success.status === 201) {
-      setTimeout(() => {
-        clearMessage();
-        router.push(`/auth/login`);
-      }, 2000);
-    }
+    return <SuccessLoginRegister type="register" />;
   }
 
-  if(error){
-    return <ErrorLoginRegisterPage type="register"/>
+  if (error) {
+    return <ErrorLoginRegisterPage type="register" />;
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (data) await register(data.email, data.username, data.password);
+    console.log({ password: data.password });
+    if (data) await register(data.email, data.password, data.username);
   };
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +131,10 @@ const Register = () => {
           </form>
           <p className="mt-xl text-center font-body-md text-on-surface-variant">
             Already using StudioCanvas?{" "}
-            <Link href={"/auth/login"} className="text-primary-container font-semibold hover:underline">
+            <Link
+              href={"/auth/login"}
+              className="text-primary-container font-semibold hover:underline"
+            >
               Sign In
             </Link>
           </p>
