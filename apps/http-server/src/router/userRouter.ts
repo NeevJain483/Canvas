@@ -19,10 +19,10 @@ UserRouter.get(
     const { q } = req.query;
 
     if (!q || typeof q !== "string" || q.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "A valid, non-empty search query parameter 'q' is required.",
-      });
+      throw new AppError(
+        "A valid, non-empty search query parameter 'q' is required.",
+        400,
+      );
     }
 
     const currentUserId = req.user?.id;
@@ -49,6 +49,7 @@ UserRouter.get(
     });
 
     return res.status(200).json({
+      source: "express",
       success: true,
       data: users,
     });
@@ -80,8 +81,8 @@ UserRouter.get(
       throw new AppError(`User with ID ${validatedResult.id} not found.`, 404);
     }
 
-    // 4. Return clean, predictable payload structure
     return res.status(200).json({
+      source: "express",
       success: true,
       data: user,
     });
@@ -125,6 +126,7 @@ UserRouter.put(
     });
 
     return res.status(200).json({
+      source: "express",
       message: "Profile updated successfully.",
       data: updatedUser,
     });
@@ -141,7 +143,7 @@ UserRouter.get(
     const limit = Math.max(1, Number(req.query.limit) || 10);
     const skip = (page - 1) * limit;
 
-    const validatedUserId = UUIDSchema.parse({id:paramId});
+    const validatedUserId = UUIDSchema.parse({ id: paramId });
     const [projects, totalProjects, projectStats] = await Promise.all([
       db.project.findMany({
         skip,
@@ -159,7 +161,7 @@ UserRouter.get(
       }),
     ]);
 
-    console.log(projects)
+    console.log(projects);
 
     const publicCount =
       projectStats.find((item) => item.is_public === true)?._count.is_public ||
@@ -180,6 +182,7 @@ UserRouter.get(
       }
     }
     return res.status(200).json({
+      source: "express",
       success: true,
       projects: projects,
       meta: {
@@ -213,7 +216,11 @@ UserRouter.delete(
     const projectIds = userProjects.map((p) => p.id);
 
     if (projectIds.length > 0) {
-      await ProjectModel.deleteMany({ project_id: { $in: projectIds as `${string}-${string}-${string}-${string}-${string}`[] } });
+      await ProjectModel.deleteMany({
+        project_id: {
+          $in: projectIds as `${string}-${string}-${string}-${string}-${string}`[],
+        },
+      });
       await db.project.deleteMany({
         where: { owner_id: id },
       });
@@ -222,6 +229,7 @@ UserRouter.delete(
       where: { id: id },
     });
     return res.status(200).json({
+      source: "express",
       success: true,
       message:
         "User account and all related project workspaces have been permanently purged.",
