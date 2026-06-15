@@ -52,6 +52,7 @@ AuthRouter.post(
     const { accessToken, refreshToken } = generateTokensAndSetCookie(res, user);
 
     return res.status(201).json({
+      source: "express",
       success: true,
       message: "Account created successfully.",
       user: formatUserResponse(user),
@@ -79,6 +80,7 @@ AuthRouter.post(
     const { accessToken, refreshToken } = generateTokensAndSetCookie(res, user);
 
     return res.status(200).json({
+      source: "express",
       success: true,
       message: "Login successful.",
       user: formatUserResponse(user),
@@ -124,6 +126,7 @@ AuthRouter.post(
     });
 
     return res.status(200).json({
+      source: "express",
       success: true,
       message: "Verification code sent to your email.",
     });
@@ -154,6 +157,7 @@ AuthRouter.post(
     delete codes[email];
 
     return res.status(200).json({
+      source: "express",
       success: true,
       message: "Password successfully updated.",
     });
@@ -196,6 +200,7 @@ AuthRouter.post(
     delete codes[email];
 
     return res.status(200).json({
+      source: "express",
       success: true,
       message: "Email verified successfully.",
     });
@@ -224,6 +229,7 @@ AuthRouter.post(
 
     const { accessToken } = generateTokensAndSetCookie(res, user);
     return res.status(200).json({
+      source: "express",
       success: true,
       accessToken,
       expiresIn: 900,

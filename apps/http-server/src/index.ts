@@ -70,10 +70,38 @@ app.get("/api/v1/ping", async (req, res) => {
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error("❌ Error caught globally:", err.message);
-  res.status(err.statusCode || 500).json({
+
+  let statusCode = err.statusCode || 500;
+  let errorCode = err.errorCode || "INTERNAL_SERVER_ERROR";
+  let source = err.source || "application"; // Defaults to your application/business logic
+  let message = err.message || "Internal Server Error";
+  let errors = err.errors || undefined;
+
+  if (
+    err instanceof SyntaxError &&
+    "status" in err &&
+    err.message.includes("JSON")
+  ) {
+    statusCode = 400;
+    errorCode = "MALFORMED_JSON_REQUEST";
+    source = "express";
+    message = "The submitted JSON payload contains syntax errors.";
+    errors = err.message;
+  }
+
+  if (err.status === 404 || message.includes("Cannot")) {
+    statusCode = 404;
+    errorCode = "ROUTE_NOT_FOUND";
+    source = "express";
+  }
+
+  res.status(statusCode).json({
     success: false,
-    message: err.message || "Internal Server Error",
-    errors: err.errors || undefined, 
+    message,
+    errorCode,
+    source,
+    data: null,
+    errors,
   });
 });
 

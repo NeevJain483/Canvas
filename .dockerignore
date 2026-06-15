@@ -1,0 +1,39 @@
+# Dependencies (Crucial - let Docker install these fresh for Linux)
+node_modules
+**/node_modules
+
+# Build Outputs & Caches (Bypass host-machine compiled bundles)
+dist
+**/dist
+.next
+**/.next
+.turbo
+**/.turbo
+
+# Local Environment Secrets (Prevent hardcoding passwords into images)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Version Control & IDE configs
+.git
+.gitignore
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+
+# OS Specific junk
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Docker specific configurations
+docker
+Dockerfile*
+.dockerignore
+
+*/web2.0

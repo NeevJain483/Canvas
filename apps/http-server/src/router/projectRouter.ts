@@ -31,6 +31,7 @@ ProjectRouter.get(
     ]);
 
     return res.status(200).json({
+      source: "express",
       success: true,
       projects,
       meta: {
@@ -49,13 +50,10 @@ ProjectRouter.post(
   asyncHandler(async (req: RequestWithUser, res) => {
     const parsedData = CreateProjectSchema.safeParse(req.body);
     if (!parsedData.success) {
-      return res.status(400).json({
-        message: "Invalid request data",
-        errors: parsedData.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
+      throw new AppError(
+        "The submitted form contains invalid or missing information.",
+        400,
+      );
     }
     const data = parsedData.data;
     const userId = req.user?.id;
@@ -79,6 +77,7 @@ ProjectRouter.post(
     }
 
     return res.status(201).json({
+      source: "express",
       success: true,
       message: "Project created successfully",
       project: createdPostgresProject,
@@ -121,6 +120,7 @@ ProjectRouter.get(
     }
 
     return res.status(200).json({
+      source: "express",
       message: "Project details retrieved successfully",
       project: projectMetadata,
       canvasState: projectCanvasState ?? newCanvasState,
@@ -145,9 +145,7 @@ ProjectRouter.delete(
     const validation = UUIDSchema.safeParse({ id });
 
     if (!validation.success) {
-      return res.status(400).json({
-        message: "Invalid or missing Project ID format.",
-      });
+      throw new AppError("Invalid or missing Project ID format.",400)
     }
 
     const validatedId = validation.data.id;
@@ -164,6 +162,7 @@ ProjectRouter.delete(
     });
 
     return res.status(200).json({
+      source: "express",
       message: "deleted project",
       id: deletedProject.id,
     });
