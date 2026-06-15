@@ -44,11 +44,10 @@ const SuccessAuth = ({
         </h1>
         <p className="text-tertiary-fixed-dim text-center mb-3">
           {type === "register" &&
-            "Your workspace is ready. Experience the next generation of creative engineering with StudioCanvas Pro&#39;s advanced asset engine."}
-
+            "Your workspace is ready. Experience the next generation of creative engineering with StudioCanvas Pro's advanced asset engine."}
           {type === "login" &&
             "Welcome Back. Your workspace is ready for the next iteration of brilliance."}
-          {type === "reset-password" &&
+          {type === "forget-password" &&
             "Check your inbox for instructions to reset your password. The link expires in 20 minutes."}
           {type === "reset-password" &&
             "Your credentials have been securely updated. You can now log back into your professional creative workspace with your new password."}
@@ -58,8 +57,9 @@ const SuccessAuth = ({
           onClick={() => clearMessage()}
           className="border border-[rgba(255,255,255,0.1)] w-full text-center py-3 mb-3 uppercase rounded-xl bg-primary-fixed-dim text-on-secondary font-semibold hover:scale-[1.03] transition-all duration-300"
         >
-          {type === "register" || (type === "login" && "Get Started")}
+          {(type === "register" || type === "login") && "Get Started"}
           {type === "forget-password" && "Reset Password"}
+          {type === "reset-password" && "Go To Login"}
         </Link>
       </section>
     </main>

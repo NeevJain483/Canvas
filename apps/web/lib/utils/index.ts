@@ -1,6 +1,6 @@
 import { ToolLogic } from "@lib/canvas/tools";
 import { CanvasElementType, CurrentProjectType } from "@repo/common/types";
-import { JSX } from "react";
+import { AxiosError } from "axios";
 import z, { ZodError } from "zod";
 
 export function getCanvasImageAsBase64(canvas: HTMLCanvasElement) {
@@ -163,7 +163,6 @@ export function loadCanvas(
 
   const drawVectorLayer = () => {
     strokes.forEach((stroke) => {
-      // Cleaner architectural abstraction: drawStroke handles its own isolation completely
       drawStroke(ctx, stroke);
     });
   };
@@ -197,6 +196,11 @@ export function handleApiError(error: any | string) {
       }
     }
   }
-
-  return "Something is wrong";
+  if (
+    error.response.data.source === "application" ||
+    error.response.data.source === "express"
+  ) {
+    return error.response.data.message;
+  }
+  return "Something went wrong";
 }

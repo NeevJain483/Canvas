@@ -32,7 +32,8 @@ const ErrorGeneral = () => {
           Something Went Wrong
         </h3>
         <p className="font-sans font-medium text-[14px] text-center text-tertiary-fixed">
-          StudioCanvas Pro encountered an unexpected <br /> interruption. We couldn&#39;t sync your current session <br /> with the cloud.
+          StudioCanvas Pro encountered an unexpected <br /> interruption. We
+          couldn&#39;t sync your current session <br /> with the cloud.
         </p>
         <div className="w-full">
           <p className="font-mono tracking-tight text-[10px]">ERROR CONTEXT</p>
@@ -50,17 +51,18 @@ const ErrorGeneral = () => {
         </div>
         <div className="flex gap-4 w-full">
           <button
-          className="flex-1 bg-primary-fixed-dim text-on-primary py-2 text-[14px] font-bold text-center flex justify-center items-center mb-1  hover:scale-[1.02] hover:shadow-sm rounded-sm transition-all duration-300"
-          onClick={handleTryAgain}
-        >
-          <span className="material-symbols-outlined mr-1">refresh</span>Refresh
-        </button>
-        <Link
-          href={"/dashboard"}
-          className="flex-1 p-2 border-2 border-primary text-primary rounded-sm text-[14px] tracking-tight flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all duration-300"
-        >
-          Go to Dashboard
-        </Link>
+            className="flex-1 bg-primary-fixed-dim text-on-primary py-2 text-[14px] font-bold text-center flex justify-center items-center mb-1  hover:scale-[1.02] hover:shadow-sm rounded-sm transition-all duration-300"
+            onClick={handleTryAgain}
+          >
+            <span className="material-symbols-outlined mr-1">refresh</span>
+            Refresh
+          </button>
+          <Link
+            href={"/dashboard"}
+            className="flex-1 p-2 border-2 border-primary text-primary rounded-sm text-[14px] tracking-tight flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all duration-300"
+          >
+            Go to Dashboard
+          </Link>
         </div>
         <div>
           <p className="flex justify-center items-center text-[12px] text-tertiary-fixed-dim">
