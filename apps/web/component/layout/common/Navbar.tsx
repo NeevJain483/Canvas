@@ -1,33 +1,83 @@
 "use client";
-import Image from "next/image";
+import { useAuthStore } from "@lib/store/authStore";
+import Link from "next/link";
 import React from "react";
-import { CgProfile } from "react-icons/cg";
-import { IoIosSearch } from "react-icons/io";
-import "@style/component/layout/dashboard/navbar.css";
-import { useRouter } from "next/navigation";
-
-import logo from "@public/logo.svg";
+import { useShallow } from "zustand/shallow";
 
 const Navbar = () => {
-  const router = useRouter();
+  const { logout } = useAuthStore(
+    useShallow((state) => ({
+      logout: state.logout,
+    })),
+  );
+
   return (
     <>
-      <nav className="dashboard-navigation">
-        <div className="dashboard-navigation-logo">
-          <Image src={logo} alt="logo" width={60} height={60}></Image>
-        </div>
-        <div className="dashboard-navigation-quick-action">
-          <button onClick={() => router.push("/dashboard")}>Home</button>
-          <button onClick={() => router.push("/marketplace")}>
-            Market Place
+      <header className="flex justify-between items-center py-2 px-6 border-b border-b-[rgba(255,255,255,0.08)]">
+        <nav className="flex justify-between items-center gap-5">
+          <Link
+            href={"/"}
+            className="text-[32px] text-primary/70 font-sans font-semibold hover:text-primary-fixed-dim"
+          >
+            StudioCanvas
+          </Link>
+          <Link
+            href={"/dashboard"}
+            className="text-primary/20 font-mono font-semibold tracking-tighter hover:text-primary/80"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href={"/dashboard/projects"}
+            className="text-primary/20  font-mono font-semibold tracking-tighter hover:text-primary/80"
+          >
+            Projects
+          </Link>
+          <Link
+            href={"/gallery"}
+            className="text-primary/20 font-mono font-semibold tracking-tighter hover:text-primary/80"
+          >
+            Gallery
+          </Link>
+        </nav>
+        <div className="flex justify-between items-center gap-4">
+          <div className="relative flex items-center">
+            <span
+              className="material-symbols-outlined absolute left-3"
+              style={{ fontSize: "20px" }}
+            >
+              search
+            </span>
+            <input
+              className="border border-[rgba(255,255,255,0.1)] outline-none rounded-xl pl-10 pr-2 py-2 text-[16px] bg-on-surface/20"
+              type="text"
+              placeholder="Search feature..."
+            />
+          </div>
+          <button className="flex justify-between items-center">
+            <span className="material-symbols-outlined hover:cursor-pointer hover:text-primary">
+              notifications
+            </span>
           </button>
-          <button onClick={() => router.push("/gallery")}>Gallery</button>
+          <button className="flex justify-between items-center">
+            <span className="material-symbols-outlined hover:cursor-pointer hover:text-primary">
+              settings
+            </span>
+          </button>
+          <button
+            onClick={() => logout()}
+            className="flex justify-between items-center hover:text-error-container hover:cursor-pointer"
+          >
+            <span className="material-symbols-outlined">logout</span>
+          </button>
+          <Link
+            href={"/dashboard/projects/new"}
+            className="py-2 px-4 bg-primary-container/80 rounded-xl uppercase text-on-tertiary font-bold"
+          >
+            Create project
+          </Link>
         </div>
-        <div className="dashboard-navigation-search-container">
-          <IoIosSearch size={32}></IoIosSearch>
-          <CgProfile size={48}></CgProfile>
-        </div>
-      </nav>
+      </header>
     </>
   );
 };

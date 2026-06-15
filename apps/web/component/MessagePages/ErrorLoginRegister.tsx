@@ -1,0 +1,105 @@
+"use client";
+import { useAuthStore } from "@lib/store/authStore";
+import { handleApiError } from "@lib/utils";
+import Link from "next/link";
+import React from "react";
+import { useShallow } from "zustand/shallow";
+
+const ErrorLoginRegisterPage = ({ type }: { type: "login" | "register" }) => {
+  const { error, clearError } = useAuthStore(
+    useShallow((state) => ({
+      error: state.error,
+      clearError: state.clearError,
+    })),
+  );
+
+  const handleTryAgain = () => {
+    clearError();
+  };
+
+  return (
+    <main className="h-screen w-screen flex items-center justify-center p-2">
+      <section className="max-w-120 flex flex-col justify-center items-center gap-4 p-6 border border-[rgba(255,255,255,0.08)] rounded-xl shadow-2xl bg-linear-300 from-primary-container/20 to-on-primary-container/20">
+        <span className="border p-2 flex border-[rgba(255,255,255,0.08)] justify-center items-center rounded-full shadow-md">
+          <span
+            className="material-symbols-outlined"
+            style={{ color: "rgba(255,0,0,0.5)", fontSize: "32px" }}
+          >
+            {type == "login" ? "lock_reset" : "warning"}
+          </span>
+        </span>
+        <h3 className="font-snas font-bold tracking-tight text-[24px] text-tertiary">
+          {type == "login" ? (
+            <>Authentication&nbsp;Failed</>
+          ) : (
+            <>Registration&nbsp;Failed</>
+          )}
+        </h3>
+        <p className="font-sans font-medium text-[14px] text-center text-tertiary-fixed">
+          {type === "login" ? (
+            <>
+              The credentials provided do not match our <br /> secure
+              records.Please verify your email <br /> and password and try
+              again.
+            </>
+          ) : (
+            <>
+              We encountered an issue while creating your account. Please check
+              your details and try again.
+            </>
+          )}
+        </p>
+        <div className="w-full">
+          <p className="font-mono tracking-tight text-[10px]">ERROR CONTEXT</p>
+          <div className="grid grid-cols-12 p-2 bg-on-primary-fixed/80 text-[12px] font-extralight">
+            <span className="col-span-11 text-wrap px-1">
+              {handleApiError(error)}
+            </span>
+            <span
+              className="material-symbols-outlined col-span-1"
+              style={{ fontSize: "16px" }}
+            >
+              error
+            </span>
+          </div>
+        </div>
+        <button
+          className="w-full bg-primary-fixed-dim text-on-primary py-2 text-[14px] font-bold text-center flex justify-center items-center mb-1  hover:scale-[1.02] hover:shadow-sm rounded-sm transition-all duration-300"
+          onClick={handleTryAgain}
+        >
+          <span className="material-symbols-outlined mr-1">refresh</span>Try
+          Again
+        </button>
+        <Link
+          href={type === "login" ? "/auth/reset-password" : "/auth/login"}
+          onClick={() => clearError()}
+          className="w-full p-2 border-2 border-primary text-primary rounded-sm text-[14px] tracking-tight flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all duration-300"
+        >
+          {" "}
+          {type === "login" && (
+            <span
+              className="material-symbols-outlined mr-1"
+              style={{ fontSize: "16px" }}
+            >
+              key
+            </span>
+          )}{" "}
+          {type == "login" ? "Reset Password" : "Sign In Instead"}
+        </Link>
+        <div>
+          <p className="flex justify-center items-center text-[12px] text-tertiary-fixed-dim">
+            Contact System Administrator
+            <span
+              className="material-symbols-outlined ml-1"
+              style={{ fontSize: "16px" }}
+            >
+              open_in_new
+            </span>
+          </p>
+        </div>
+      </section>
+    </main>
+  );
+};
+
+export default ErrorLoginRegisterPage;

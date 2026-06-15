@@ -1,10 +1,11 @@
 import { ToolLogic } from "@lib/canvas/tools";
 import { CanvasElementType, CurrentProjectType } from "@repo/common/types";
+import { AxiosError } from "axios";
+import z, { ZodError } from "zod";
 
 export function getCanvasImageAsBase64(canvas: HTMLCanvasElement) {
   if (!canvas) return;
   const base64Image = canvas.toDataURL("image/png");
-  console.log(base64Image);
   return base64Image;
 }
 
@@ -13,7 +14,7 @@ export function drawStroke(
   stroke: CanvasElementType,
 ) {
   ctx.save();
-  
+
   if (stroke.type === "eraser") {
     ctx.globalCompositeOperation = "destination-out";
   } else {
@@ -24,7 +25,6 @@ export function drawStroke(
   }
 
   ctx.lineWidth = stroke.width;
-  console.log("Width",stroke.width)
 
   switch (stroke.type) {
     case "brush":
@@ -32,19 +32,16 @@ export function drawStroke(
       ctx.globalAlpha = 1;
       if (stroke.points.length === 1) {
         const point = stroke.points[0]!;
-        ToolLogic.brush(
-          ctx,
-          point,
-          point,
-          stroke.width,
-          0.2,
-        );
+        ToolLogic.brush(ctx, point, point, stroke.width, 0.2);
       } else {
         for (let i = 0; i < stroke.points.length - 1; i++) {
           ToolLogic.brush(
             ctx,
             { x: stroke.points[i]?.x || 0, y: stroke.points[i]?.y || 0 },
-            { x: stroke.points[i + 1]?.x || 0, y: stroke.points[i + 1]?.y || 0 },
+            {
+              x: stroke.points[i + 1]?.x || 0,
+              y: stroke.points[i + 1]?.y || 0,
+            },
             stroke.width,
             0.2,
           );
@@ -60,7 +57,10 @@ export function drawStroke(
           ToolLogic.eraser(
             ctx,
             { x: stroke.points[i]?.x || 0, y: stroke.points[i]?.y || 0 },
-            { x: stroke.points[i + 1]?.x || 0, y: stroke.points[i + 1]?.y || 0 },
+            {
+              x: stroke.points[i + 1]?.x || 0,
+              y: stroke.points[i + 1]?.y || 0,
+            },
           );
         }
       }
@@ -87,7 +87,7 @@ export function drawStroke(
       );
       break;
   }
-  
+
   ctx.restore();
 }
 
@@ -119,8 +119,12 @@ export function updateCurrentProject(
 
     const bakeAndSave = () => {
       const excessCount = updatedProject.canvasState.strokes.length - 10;
-      const strokesToBake = updatedProject.canvasState.strokes.slice(0, excessCount);
-      const remainingStrokes = updatedProject.canvasState.strokes.slice(excessCount);
+      const strokesToBake = updatedProject.canvasState.strokes.slice(
+        0,
+        excessCount,
+      );
+      const remainingStrokes =
+        updatedProject.canvasState.strokes.slice(excessCount);
 
       for (const strokeToBake of strokesToBake) {
         drawStroke(ctx, strokeToBake);
@@ -159,7 +163,6 @@ export function loadCanvas(
 
   const drawVectorLayer = () => {
     strokes.forEach((stroke) => {
-      // Cleaner architectural abstraction: drawStroke handles its own isolation completely
       drawStroke(ctx, stroke);
     });
   };
@@ -174,4 +177,30 @@ export function loadCanvas(
   } else {
     drawVectorLayer();
   }
+}
+
+export function handleApiError(error: any | string) {
+  if (error instanceof ZodError) {
+    const fieldErrors = z.flattenError(error).fieldErrors as Record<
+      string,
+      string[]
+    > | null;
+
+    if (fieldErrors) {
+      if (fieldErrors["username"]) {
+        return fieldErrors["username"][0];
+      } else if (fieldErrors["email"]) {
+        return fieldErrors["email"][0];
+      } else if (fieldErrors["password"]) {
+        return fieldErrors["password"][0];
+      }
+    }
+  }
+  if (
+    error.response.data.source === "application" ||
+    error.response.data.source === "express"
+  ) {
+    return error.response.data.message;
+  }
+  return "Something went wrong";
 }

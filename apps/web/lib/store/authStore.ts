@@ -36,8 +36,8 @@ interface AuthStore {
   login: (email: string, password: string) => Promise<void>;
   register: (
     email: string,
-    username: string,
     password: string,
+    username: string,
   ) => Promise<void>;
   logout: () => void;
   resetPassword: (newPassword: string, code: string) => Promise<void>;
