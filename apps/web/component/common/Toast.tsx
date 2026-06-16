@@ -5,7 +5,6 @@ import { ZodError } from "zod";
 import { useShallow } from "zustand/shallow";
 
 import { useAuthStore } from "@lib/store/authStore";
-import "@style/component/common/toast.css";
 
 const Toast = () => {
   const { error, success } = useAuthStore(

@@ -14,8 +14,6 @@ import {
 } from "react-icons/md";
 import { useShallow } from "zustand/shallow";
 
-import "@style/component/dashboard/recentactivity.css";
-
 const ProjectCard = ({ project }: { project: ProjectDataType }) => {
   const [toggle, setToggle] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

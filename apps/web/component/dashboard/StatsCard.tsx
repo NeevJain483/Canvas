@@ -5,7 +5,6 @@ import { RiGitRepositoryPrivateLine } from "react-icons/ri";
 import { MdOutlinePublic } from "react-icons/md";
 import { LuRuler } from "react-icons/lu";
 
-import "@style/component/dashboard/statscard.css";
 import { useProjectStore } from "@lib/store/projectStore";
 import { useShallow } from "zustand/shallow";
 
