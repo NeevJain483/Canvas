@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { MdOutlineExpandMore, MdOutlineDownload } from "react-icons/md";
-import { ExportFormat, ExportUtils } from "@lib/canvas/export";
+import { ExportFormat, ExportCanvas } from "@lib/canvas/export";
 import { MoreBtn, OptionForMore } from "@ui/MoreBtn";
 import { FaSave } from "react-icons/fa";
 import { useProjectStore } from "@lib/store/projectStore";
@@ -47,7 +47,7 @@ const More: React.FC<MoreProps> = ({ canvasEngineRef }) => {
     }
 
     try {
-      ExportUtils.saveAs(canvasEngineRef.current, format);
+      ExportCanvas.saveAs(canvasEngineRef.current, format);
       setToggle(false);
     } catch (error) {
       console.error(`Export to ${format.toUpperCase()} failed:`, error);
