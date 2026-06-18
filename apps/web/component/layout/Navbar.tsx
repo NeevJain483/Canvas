@@ -13,7 +13,7 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="fixed top-0 w-full flex justify-between items-center py-2 px-6 border-b border-b-[rgba(255,255,255,0.08)] bg-background/70 backdrop-blur-xl">
+      <header className="fixed top-0 w-full flex justify-between items-center py-2 px-6 border-b border-b-[rgba(255,255,255,0.08)] bg-background/70 backdrop-blur-xl z-10">
         <nav className="flex justify-between items-center gap-5">
           <Link
             href={"/"}

@@ -1,6 +1,6 @@
 export type ExportFormat = "png" | "jpeg" | "webp";
 
-export const ExportUtils = {
+export const ExportCanvas = {
   saveAs: (mainCanvas: HTMLCanvasElement, format: "png" | "webp" | "jpeg") => {
     const offscreen = document.createElement("canvas");
     offscreen.width = mainCanvas.width;

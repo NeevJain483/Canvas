@@ -1,5 +1,6 @@
 "use client";
 import { useAuthStore } from "@lib/store/authStore";
+import { useProjectStore } from "@lib/store/projectStore";
 import { handleApiError } from "@lib/utils";
 import Link from "next/link";
 import React from "react";
@@ -12,9 +13,16 @@ const ErrorGeneral = () => {
       clearError: state.clearError,
     })),
   );
+  const { projectError, clearProjectMessage } = useProjectStore(
+    useShallow((state) => ({
+      projectError: state.projectError,
+      clearProjectMessage: state.clearProjectMessage,
+    })),
+  );
 
   const handleTryAgain = () => {
     clearError();
+    clearProjectMessage();
   };
 
   return (
@@ -39,7 +47,8 @@ const ErrorGeneral = () => {
           <p className="font-mono tracking-tight text-[10px]">ERROR CONTEXT</p>
           <div className="grid grid-cols-12 p-2 bg-on-primary-fixed/80 text-[12px] font-extralight">
             <span className="col-span-11 text-wrap px-1">
-              {handleApiError(error)}
+              {error && handleApiError(error)}
+              {projectError && handleApiError(projectError)}
             </span>
             <span
               className="material-symbols-outlined col-span-1"

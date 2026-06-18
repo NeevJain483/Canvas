@@ -23,7 +23,7 @@ const Sidebar = () => {
               >
                 {" "}
                 <span className="material-symbols-outlined">add_box</span>
-                New Canvas
+                New&nbsp;Canvas
               </Link>
             </li>
             <li>
@@ -66,8 +66,7 @@ const Sidebar = () => {
                 className="flex items-center px-7 md:pr-20 gap-4 font-semibold py-4 hover:bg-primary/10"
               >
                 {" "}
-                <span className="material-symbols-outlined">cloud</span> Cloud
-                Sync
+                <span className="material-symbols-outlined">cloud</span> Cloud&nbsp;Sync
               </Link>
             </li>
           </ul>

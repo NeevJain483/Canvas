@@ -239,7 +239,6 @@ export function useCanvas() {
       pointsRef.current = [];
       lastPoint.current = null;
       currentPoint.current = null;
-      console.log(currentProjectRef.current.canvasState)
     };
 
     preview.addEventListener("pointerdown", handleDown);

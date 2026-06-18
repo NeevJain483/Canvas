@@ -56,6 +56,7 @@ interface ProjectStore {
   ): Promise<void>;
   fetchProjectById(id: UUID, data: Partial<ProjectDataType>): Promise<void>;
   setCurrentProject(project: CurrentProjectType): void;
+  clearProjectMessage(): void;
 
   // CRUD Actions
   createProject(data: CreateProjectType): Promise<UUID>;
@@ -177,8 +178,12 @@ export const useProjectStore = create<ProjectStore>()(
       },
       setCurrentProject: (project: CurrentProjectType) => {
         set((state) => {
-          state.projectsLoading = true;
           state.currentProject = project;
+        });
+      },
+      clearProjectMessage: () => {
+        set((state) => {
+          state.projectError = null;
         });
       },
 
@@ -215,7 +220,6 @@ export const useProjectStore = create<ProjectStore>()(
 
         try {
           const response = await apiClient.delete(`/projects/${id}`);
-          console.log(response.data);
           set((state) => {
             state.projectsLoading = false;
             state.projects = get().projects.filter((el) => el.id != id);
@@ -244,6 +248,19 @@ export const useProjectStore = create<ProjectStore>()(
     })),
     {
       name: "project-store",
+      partialize: (state) => ({
+        currentProject: state.currentProject,
+        currentPage: state.currentPage,
+        totalPages: state.totalPages,
+        totalProjects: state.totalProjects,
+        publicProjects: state.publicProjects,
+        privateProjects: state.privateProjects,
+        searchQuery: state.searchQuery,
+        filterBy: state.filterBy,
+        autoSaveEnabled: state.autoSaveEnabled,
+        lastAutoSaveTime: state.lastAutoSaveTime,
+        autoSaveInterval: state.autoSaveInterval,
+      }),
     },
   ),
 );

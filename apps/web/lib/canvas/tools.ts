@@ -36,6 +36,8 @@ export const ToolLogic = {
   eraser: (ctx: CanvasRenderingContext2D, start: Point, end: Point) => {
     const originalComposite = ctx.globalCompositeOperation;
     ctx.globalCompositeOperation = "destination-out";
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     const dx = end.x - start.x;
     const dy = end.y - start.y;
@@ -52,7 +54,6 @@ export const ToolLogic = {
       ctx.stroke();
       ctx.closePath();
     }
-
     ctx.globalCompositeOperation = originalComposite;
   },
 
@@ -100,6 +101,8 @@ export const ToolLogic = {
       const y = start.y + dy * t;
 
       ctx.beginPath();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
       const radius = brushSize / 2;
 
       if (hardness === 1) {

@@ -26,10 +26,6 @@ const RecentActivity = () => {
     })();
   }, [fetchProjectsByUser, user]);
 
-  React.useEffect(() => {
-    console.log("Projects updated in store: ", projects);
-  }, [projects]);
-
   return (
     <>
       <div className="recent-activity">

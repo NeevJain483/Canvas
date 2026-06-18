@@ -3,8 +3,10 @@ import Loading from "@component/common/Loading";
 import { useAuthStore } from "@lib/store/authStore";
 import React, { useEffect, useState } from "react";
 import { useShallow } from "zustand/shallow";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@component/layout/Navbar";
+import ErrorGeneral from "@component/MessagePages/ErrorGeneral";
+import { useProjectStore } from "@lib/store/projectStore";
 
 export default function AuthLayout({
   children,
@@ -18,10 +20,18 @@ export default function AuthLayout({
       _hasHydrated: state._hasHydrated,
     })),
   );
+  const { error, projectsLoading } = useProjectStore(
+    useShallow((state) => ({
+      createProject: state.createProject,
+      error: state.projectError,
+      projectsLoading: state.projectsLoading,
+    })),
+  );
 
   const [isClient, setIsClient] = useState(false);
-
   const router = useRouter();
+  const pathname = usePathname();
+  const isNavbar = pathname.split("/").includes("edit") || pathname.split("/").includes("review");
 
   useEffect(() => {
     setIsClient(true);
@@ -33,10 +43,11 @@ export default function AuthLayout({
     }
   }, [isLoading, user, router, _hasHydrated]);
 
-  if (isLoading || !isClient || !_hasHydrated) return <Loading />;
+  if (error) return <ErrorGeneral />;
+  if (isLoading || !isClient || !_hasHydrated || projectsLoading) return <Loading />;
   return (
     <>
-      <Navbar />
+      {!isNavbar && <Navbar />}
       {children}
     </>
   );
