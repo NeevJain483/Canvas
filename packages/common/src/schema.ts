@@ -79,7 +79,7 @@ export const ProjectDataSchema = z.object({
   owner_id: z.uuid(),
   title: z.string(),
   description: z.string(),
-  thumbnail_url: z.string().optional(),
+  thumbnail_url: z.string().optional().nullable(),
   is_public: z.boolean(),
   width: z.number(),
   height: z.number(),

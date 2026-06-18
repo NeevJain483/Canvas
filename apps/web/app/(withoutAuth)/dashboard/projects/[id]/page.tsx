@@ -1,15 +1,16 @@
-import Main from "@component/projects/Main";
+"use client";
+import { useRouter } from "next/navigation";
+import { use, useEffect } from "react";
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+const Page = ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = use(params);
+  const router = useRouter();
 
-  return (
-    <>
-      <Main id={id}></Main>
-    </>
-  );
-}
+  useEffect(() => {
+    router.push(`${id}/review`);
+  }, [router,id]);
+
+  return null;
+};
+
+export default Page;

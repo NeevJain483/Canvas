@@ -1,6 +1,5 @@
 import { ToolLogic } from "@lib/canvas/tools";
 import { CanvasElementType, CurrentProjectType } from "@repo/common/types";
-import { AxiosError } from "axios";
 import z, { ZodError } from "zod";
 
 export function getCanvasImageAsBase64(canvas: HTMLCanvasElement) {
@@ -160,7 +159,10 @@ export function loadCanvas(
   const { baseImageUrl, strokes } = currentProject.canvasState;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+  ctx.save()
+  ctx.fillStyle = currentProject.project.background_color
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.restore()
   const drawVectorLayer = () => {
     strokes.forEach((stroke) => {
       drawStroke(ctx, stroke);
@@ -187,18 +189,16 @@ export function handleApiError(error: any | string) {
     > | null;
 
     if (fieldErrors) {
-      if (fieldErrors["username"]) {
-        return fieldErrors["username"][0];
-      } else if (fieldErrors["email"]) {
-        return fieldErrors["email"][0];
-      } else if (fieldErrors["password"]) {
-        return fieldErrors["password"][0];
-      }
+      return Object.values(fieldErrors).map((el) => {
+        return el;
+      });
     }
   }
   if (
-    error.response.data.source === "application" ||
-    error.response.data.source === "express"
+    error.response &&
+    error.response.data &&
+    (error.response.data.source === "application" ||
+      error.response.data.source === "express")
   ) {
     return error.response.data.message;
   }

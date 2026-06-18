@@ -1,190 +1,145 @@
 "use client";
 import { useProjectStore } from "@lib/store/projectStore";
 import { ProjectDataType, UUID } from "@repo/common/types";
-import { MoreBtn, OptionForMore } from "@ui/MoreBtn";
-import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
-import { IconType } from "react-icons";
-import { IoImageOutline } from "react-icons/io5";
-import {
-  MdOutlineEdit,
-  MdOutlineDeleteOutline,
-  MdOutlineExpandMore,
-} from "react-icons/md";
+import { useEffect, useState } from "react";
 import { useShallow } from "zustand/shallow";
 
-import "@style/component/dashboard/recentactivity.css";
-
-const ProjectCard = ({ project }: { project: ProjectDataType }) => {
-  const [toggle, setToggle] = useState<boolean>(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-
+const ProjectCard = ({
+  project,
+  type,
+}: {
+  project: ProjectDataType;
+  type?: "solid";
+}) => {
+  const [isOption, setIsOption] = useState(false);
   const { deleteProject } = useProjectStore(
     useShallow((state) => ({
       deleteProject: state.deleteProject,
     })),
   );
-
-  const optionsConfig: {
-    icon: IconType;
-    format: {
-      iconColor: string;
-      label: string;
-    };
-    action: () => void;
-  }[] = [
-    {
-      icon: MdOutlineEdit,
-      format: {
-        iconColor: "#475569",
-        label: "Edit",
-      },
-      action: () => router.push(`/dashboard/projects/${project.id}/edit`),
-    },
-    {
-      icon: MdOutlineDeleteOutline,
-      format: {
-        iconColor: "#ef4444",
-        label: "Delete",
-      },
-      action: async () => {
-        deleteProject(project.id as UUID);
-      },
-    },
-  ];
+  const router = useRouter();
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setToggle(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    window.addEventListener("click", () => {
+      setIsOption(false);
+    });
   }, []);
 
-  return (
-    <div
-      style={{
-        position: "relative",
-        maxHeight: "200px",
-        maxWidth: "266px",
-        height: "100%",
-        justifySelf: "center",
-        width: "100%",
-      }}
-      ref={dropdownRef}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: "5px",
-          right: "5px",
-          zIndex: 4,
-        }}
-      >
-        <MoreBtn
-          icon={MdOutlineExpandMore}
-          onClick={(e) => {
-            e.stopPropagation();
-            setToggle(!toggle);
-          }}
-        />
-
-        {toggle && (
-          <div
-            style={{
-              position: "absolute",
-              top: "40px",
-              right: "0px",
-              backgroundColor: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "6px",
-              padding: "4px",
-              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-              minWidth: "120px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "2px",
-            }}
-          >
-            {optionsConfig.map((el) => (
-              <div
-                key={el.format.label}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  el.action();
-                  setToggle(false);
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <OptionForMore format={el.format} icon={el.icon} />
-              </div>
-            ))}
+  if (type === "solid")
+    return (
+      <div className="relative w-fit h-fit">
+        {isOption && (
+          <div className="absolute right-0 top-0 z-10">
+            <Option
+              deleteProject={() => deleteProject(project.id as UUID)}
+              edit={() => router.push(`projects/${project.id}/edit`)}
+              settings={()=>router.push(`projects/${project.id}/settings`)}
+            />
           </div>
         )}
-      </div>
-
-      <div style={{ height: "100%" }}>
-        <button
-          className="recent-activity-card"
-          style={{
-            cursor: "pointer",
-            width: "100%",
-            height: "100%",
-            textAlign: "left",
-            border: "none",
-            background: "none",
-            padding: 0,
-          }}
-          onClick={() => {
-            router.push(`/dashboard/projects/${project.id}/edit`);
-          }}
+        <Link
+          href={`/dashboard/projects/${project.id}/edit`}
+          className="border border-[rgba(255,255,255,0.1)] rounded-xl overflow-hidden hover:border-primary/40 transition-all flex flex-col h-85"
         >
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              position: "relative",
-              overflow: "hidden",
-              borderRadius: "6px",
-            }}
-          >
-            {project.thumbnail_url ? (
-              <Image
-                src={project.thumbnail_url}
-                alt={project.title || "Project preview"}
-                sizes="100vw"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  backgroundColor: "#f1f5f9",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#94a3b8",
+          <div className="aspect-video relative overflow-hidden bg-surface-container-high">
+            <img
+              className="w-full h-full object-cover"
+              src={"/canvas/alternate.png"}
+            />
+          </div>
+          <div className="p-md flex-1 flex flex-col justify-between">
+            <h3 className="font-headline-md text-body-lg text-on-surface truncate">
+              {project.title}
+            </h3>
+            <div className="flex items-center justify-between border-t border-white/5 pt-md">
+              <span className="text-label-md text-on-surface-variant">
+                Edited recently
+              </span>
+              <button
+                className="material-symbols-outlined p-2 border border-[rgba(255,255,255,0.08)] shadow-sm shadow-primary bg-primary/10 rounded-xl"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsOption(!isOption);
                 }}
               >
-                <IoImageOutline size={48} />
-              </div>
-            )}
+                more_vert
+              </button>
+            </div>
           </div>
+        </Link>
+      </div>
+    );
+  return (
+    <Link
+      href={`dashboard/projects/${project.id}/edit`}
+      className="inline-block border border-[rgba(255,255,255,0.1)] w-full rounded-xl overflow-hidden"
+    >
+      <div className="aspect-video relative overflow-hidden bg-surface-container-high">
+        <img
+          className="w-full h-full object-cover"
+          src={"/canvas/alternate.png"}
+        />
+      </div>
+      <p className="text-[18px] p-2 pb-6">
+        {project.title || "Untitled Project"}
+      </p>
+    </Link>
+  );
+};
 
-          <p style={{ marginTop: "8px", fontWeight: 500, color: "#1e293b" }}>
-            {project.title || "Untitled Project"}
-          </p>
+type OptionType = {
+  deleteProject: () => void;
+  edit: () => void;
+  settings: () => void;
+};
+
+const Option: React.FC<OptionType> = ({ deleteProject, edit, settings }) => {
+  return (
+    <>
+      <div className="w-fit bg-neutral-950 border border-white/10 rounded-xl p-1.5 shadow-2xl flex flex-col gap-0.5 backdrop-blur-md">
+        {/* --- Management Actions Group --- */}
+        <button
+          className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-neutral-300 rounded-lg hover:bg-white/5 active:scale-[0.98] transition-all duration-150 group"
+          onClick={(e) => {
+            e.stopPropagation();
+            edit();
+          }}
+        >
+          <span className="material-symbols-outlined text-base text-neutral-500 group-hover:text-primary transition-colors">
+            edit
+          </span>
+          Edit&nbsp;Project
+        </button>
+
+        <button
+          className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-400 rounded-lg hover:bg-red-500/10 active:scale-[0.98] transition-all duration-150 group"
+          onClick={(e) => {
+            e.stopPropagation();
+            deleteProject();
+          }}
+        >
+          <span className="material-symbols-outlined text-base text-red-400/50 group-hover:text-red-400 transition-colors">
+            delete
+          </span>
+          Delete
+        </button>
+        <button
+          className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-400 rounded-lg hover:bg-red-500/10 active:scale-[0.98] transition-all duration-150 group"
+          onClick={(e) => {
+            e.stopPropagation();
+            settings();
+          }}
+        >
+          <span className="material-symbols-outlined text-base text-red-400/50 group-hover:text-red-400 transition-colors">
+            setting
+          </span>
+          Setting
         </button>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -5,9 +5,6 @@
       "@lib/*": [
         "./lib/*"
       ],
-      "@style/*": [
-        "./style/*"
-      ],
       "@component/*": [
         "./component/*"
       ],

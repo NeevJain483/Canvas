@@ -79,8 +79,8 @@ export const useCanvasStore = create<CanvasStoreType>()(
       currentTool: "brush",
       brushSize: 8,
       brushOpacity: 1,
-      brushHardness: 0.5,
-      currentColor: "#000",
+      brushHardness: 1,
+      currentColor: "#cdffde",
       brushBlendMode: "source-over",
 
       // History & Undo/Redo
@@ -103,7 +103,6 @@ export const useCanvasStore = create<CanvasStoreType>()(
         });
       },
       setColor(color: string) {
-        console.log("color");
         set((state) => {
           state.currentColor = color;
         });
@@ -175,6 +174,7 @@ export const useCanvasStore = create<CanvasStoreType>()(
     {
       name: "canvas-store",
       partialize: (state) => ({
+        currentTool: state.currentTool,
         currentColor: state.currentColor,
       }),
     },

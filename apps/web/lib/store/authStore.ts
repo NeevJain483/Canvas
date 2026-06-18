@@ -22,6 +22,10 @@ export interface User {
 }
 
 interface AuthStore {
+  // hydration state
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
+
   // State
   user: User | null;
   isAuthenticated: boolean;
@@ -56,6 +60,13 @@ interface AuthStore {
 export const useAuthStore = create<AuthStore>()(
   persist(
     immer<AuthStore>((set, get) => ({
+      _hasHydrated: false,
+      setHasHydrated: (value: boolean) => {
+        set((state) => {
+          state._hasHydrated = value;
+        });
+      },
+
       user: null,
       isAuthenticated: false,
       isLoading: false,
@@ -275,6 +286,9 @@ export const useAuthStore = create<AuthStore>()(
     })),
     {
       name: "auth-store",
+      onRehydrateStorage: (state) => {
+        return () => state.setHasHydrated(true);
+      },
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,

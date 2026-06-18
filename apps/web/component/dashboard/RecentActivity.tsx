@@ -3,7 +3,6 @@ import React from "react";
 import { IoMdAdd } from "react-icons/io";
 import { useRouter } from "next/navigation";
 
-import "@style/component/dashboard/recentactivity.css";
 import { useProjectStore } from "@lib/store/projectStore";
 import { useShallow } from "zustand/shallow";
 import { useAuthStore } from "@lib/store/authStore";
@@ -26,10 +25,6 @@ const RecentActivity = () => {
       await fetchProjectsByUser(user.id as UUID, 1, 3);
     })();
   }, [fetchProjectsByUser, user]);
-
-  React.useEffect(() => {
-    console.log("Projects updated in store: ", projects);
-  }, [projects]);
 
   return (
     <>

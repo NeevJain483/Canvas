@@ -161,8 +161,6 @@ UserRouter.get(
       }),
     ]);
 
-    console.log(projects);
-
     const publicCount =
       projectStats.find((item) => item.is_public === true)?._count.is_public ||
       0;

@@ -37,7 +37,6 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({ password: data.password });
     if (data) await register(data.email, data.password, data.username);
   };
 
