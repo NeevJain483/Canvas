@@ -68,6 +68,7 @@ const ErrorGeneral = () => {
           </button>
           <Link
             href={"/dashboard"}
+            onClick={() => clearProjectMessage()}
             className="flex-1 p-2 border-2 border-primary text-primary rounded-sm text-[14px] tracking-tight flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all duration-300"
           >
             Go to Dashboard

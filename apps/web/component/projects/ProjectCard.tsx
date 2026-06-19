@@ -134,7 +134,7 @@ const Option: React.FC<OptionType> = ({ deleteProject, edit, settings }) => {
           }}
         >
           <span className="material-symbols-outlined text-base text-red-400/50 group-hover:text-red-400 transition-colors">
-            setting
+            settings
           </span>
           Setting
         </button>

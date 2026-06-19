@@ -4,6 +4,7 @@ import ToolThicknessSlider from "@component/canvas/ToolThicknessSlider";
 import ToolColorSelector from "@component/canvas/ToolColorSelector";
 import { BrushSettings, useCanvasStore } from "@lib/store/canvasStore";
 import { useShallow } from "zustand/shallow";
+import { useProjectStore } from "@lib/store/projectStore";
 
 const ToolSetting = () => {
   const [brushData, setBrushData] = useState<Partial<BrushSettings>>({
@@ -12,6 +13,9 @@ const ToolSetting = () => {
     brushHardness: 1,
     currentColor: "#fffff",
   });
+
+  const saveProject = useProjectStore((state) => state.saveProject);
+  const isSaving = useProjectStore((state) => state.isSaving);
 
   const {
     currentColor,
@@ -63,9 +67,22 @@ const ToolSetting = () => {
       brushSize,
     });
   }, []);
+  4;
 
   return (
     <section className="border-l border-l-[rgba(255,255,255,0.1)] h-full p-4 flex flex-col gap-3">
+      <section className="flex items-center gap-3">
+        <button
+          className="material-symbols-outlined p-2 bg-primary/10 hover:bg-primary/20 active:bg-primary/30 border border-[rgba(255,255,255,0.1)] rounded-md cursor-pointer"
+          onClick={() => saveProject()}
+          disabled={isSaving}
+        >
+          save
+        </button>
+        {isSaving && (
+          <span className="text-sm text-gray-400 animate-pulse">Saving...</span>
+        )}
+      </section>
       <h2 className="py-6 uppercase font-semibold border-b border-b-[rgba(255,255,255,0.1)]">
         Inspector
       </h2>
@@ -85,7 +102,6 @@ const ToolSetting = () => {
           <span className="tabular-nums">{brushData.brushSize}px</span>
         </div>
       </div>
-
       <div>
         <p className="text-[12px] font-semibold uppercase mb-1">Opacity</p>
         <div className="flex justify-between items-center gap-3">

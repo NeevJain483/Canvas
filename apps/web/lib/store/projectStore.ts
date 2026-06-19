@@ -41,6 +41,7 @@ interface ProjectStore {
   lastAutoSaveTime: number;
   autoSaveInterval: number;
   isSaving: boolean;
+  autoSaveIntervalId: ReturnType<typeof setInterval> | null;
 
   //Fetch Actions
   fetchProjects(
@@ -66,7 +67,7 @@ interface ProjectStore {
 
   // Save Actions
   saveProject(force?: boolean): Promise<void>;
-  // autoSave(): Promise<void>;
+  autoSave(): Promise<void>;
   // discardChanges(): void;
 
   // Search & Filter
@@ -96,8 +97,9 @@ export const useProjectStore = create<ProjectStore>()(
       // auto-save
       autoSaveEnabled: true,
       lastAutoSaveTime: Date.now(),
-      autoSaveInterval: 15000,
+      autoSaveInterval: 30000,
       isSaving: false,
+      autoSaveIntervalId: null,
 
       //fetch action
       fetchProjects: async (
@@ -219,7 +221,7 @@ export const useProjectStore = create<ProjectStore>()(
         });
 
         try {
-          const response = await apiClient.delete(`/projects/${id}`);
+          await apiClient.delete(`/projects/${id}`);
           set((state) => {
             state.projectsLoading = false;
             state.projects = get().projects.filter((el) => el.id != id);
@@ -233,16 +235,33 @@ export const useProjectStore = create<ProjectStore>()(
       },
       // Save Action
       saveProject: async (force?: boolean) => {
+        const id = get().currentProject?.project.id;
         set((state) => {
-          state.projectsLoading = true;
+          state.isSaving = true;
         });
         try {
-          await apiClient.put(``, {});
+          await apiClient.put(`/projects/${id}`, {
+            ...get().currentProject?.canvasState,
+          });
+          set((state) => {
+            state.isSaving = false;
+          });
         } catch (error) {
-          console.log(error);
+          set((state) => {
+            state.projectError = error;
+            state.isSaving = false;
+          });
         }
+      },
+      autoSave: async () => {
+        if (get().autoSaveIntervalId) {
+          clearInterval(get().autoSaveIntervalId!);
+        }
+        const id = setInterval(async () => {
+          await get().saveProject();
+        }, get().autoSaveInterval);
         set((state) => {
-          state.projectsLoading = false;
+          state.autoSaveIntervalId = id;
         });
       },
     })),

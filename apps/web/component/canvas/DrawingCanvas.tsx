@@ -123,22 +123,20 @@ export const DrawingCanvas = ({ mode }: { mode: "edit" | "review" }) => {
   if (mode === "edit")
     return (
       <main className="flex w-screen h-screen justify-between items-center">
-        {mode === "edit" && <Toolbar />}
+        <Toolbar />
         <section className="flex justify-center items-center">
           <div className="relative flex-1">
             <canvas
-              className="main-canvas w-[1080px] h-[720px]"
-              ref={mode === "edit" ? canvasRef : reviewCanvasRef}
+              className="main-canvas w-270 h-180"
+              ref={canvasRef}
             ></canvas>
-            {mode === "edit" && (
-              <canvas
-                className="preview-canvas absolute top-0 left-0 z-10 border w-[1080px] h-[720px]"
-                ref={previewRef}
-              ></canvas>
-            )}
+            <canvas
+              className="preview-canvas absolute top-0 left-0 z-10 border w-270 h-180"
+              ref={previewRef}
+            ></canvas>
           </div>
         </section>
-        {mode === "edit" && <ToolSetting />}
+        <ToolSetting />
       </main>
     );
   if (mode === "review")
@@ -146,7 +144,7 @@ export const DrawingCanvas = ({ mode }: { mode: "edit" | "review" }) => {
       <main className="flex w-screen h-screen justify-center items-center">
         <section className="flex justify-center items-center flex-1">
           <canvas
-            className="main-canvas w-[1080px] h-[720px]"
+            className="main-canvas w-270 h-180"
             ref={reviewCanvasRef}
           ></canvas>
         </section>

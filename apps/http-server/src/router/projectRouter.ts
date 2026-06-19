@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { verifyAccessToken } from "../middleware/verifyToken";
 import { db } from "@repo/common/config";
-import { CreateProjectSchema, UUIDSchema } from "@repo/common/schema";
+import {
+  CanvasStateSchema,
+  CreateProjectSchema,
+  UUIDSchema,
+} from "@repo/common/schema";
 import { RequestWithUser } from "../types";
 import { ProjectModel } from "@repo/mongodb/model";
 import { UUID } from "@repo/common/types";
@@ -128,12 +132,19 @@ ProjectRouter.get(
   }),
 );
 
-// TODO: update project
-ProjectRouter.put("/:id", (req, res) => {
-  return res.json({
+// update project
+ProjectRouter.put("/:id", asyncHandler(async (req, res) => {
+  const {id} = req.params;
+  const parsedData = CanvasStateSchema.partial().safeParse(req.body);
+  if (!parsedData.success)
+    throw new AppError("Provided data is either false or incomplete", 400);
+  await ProjectModel.updateOne({ project_id:id as UUID }, { ...parsedData.data });
+
+  return res.status(200).json({
+    source: "express",
     message: "update project",
   });
-});
+}));
 
 // delete project
 ProjectRouter.delete(
@@ -145,7 +156,7 @@ ProjectRouter.delete(
     const validation = UUIDSchema.safeParse({ id });
 
     if (!validation.success) {
-      throw new AppError("Invalid or missing Project ID format.",400)
+      throw new AppError("Invalid or missing Project ID format.", 400);
     }
 
     const validatedId = validation.data.id;
