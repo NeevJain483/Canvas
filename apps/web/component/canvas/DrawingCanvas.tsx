@@ -1,25 +1,13 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
-
-import { useCanvasStore } from "@lib/store/canvasStore";
+import React, { useEffect, useRef } from "react";
 import { useCanvas } from "@lib/hooks/useCanvas";
 import Toolbar from "@component/canvas/Toolbar";
-import { useShallow } from "zustand/shallow";
 import ToolSetting from "@component/canvas/ToolSetting";
-import More from "@component/canvas/More";
 import { useProjectStore } from "@lib/store/projectStore";
 import { loadCanvas } from "@lib/utils";
-import { ExportCanvas } from "@lib/canvas/export";
+import DownloadOptions from "@component/canvas/DownloadOptions";
 
 export const DrawingCanvas = ({ mode }: { mode: "edit" | "review" }) => {
-  // const { setColor, setBrushSettings } = useCanvasStore(
-  //   useShallow((state) => ({
-  //     setColor: state.setColor,
-  //     setBrushSettings: state.setBrushSettings,
-  //   })),
-  // );
-
   const currentProject = useProjectStore((state) => state.currentProject);
   const { canvasRef, previewRef } = useCanvas();
   const reviewCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -67,59 +55,6 @@ export const DrawingCanvas = ({ mode }: { mode: "edit" | "review" }) => {
 
     loadCanvas(tempCtx, currentProject);
   }, [currentProject, reviewCanvasRef]);
-
-  // return (
-  //   <>
-  //     <div
-  //       className="canvas-container"
-  //       style={{ gridRow: `span ${fullScreenMode ? 2 : 1}` }}
-  //     >
-  //       <div className="full-mode-button">
-  //         <button
-  //           style={{
-  //             padding: "6px",
-  //             backgroundColor: "#c1ccd8",
-  //             borderRadius: "8px",
-  //             border: "1px solid #e2e8f0",
-  //             cursor: "pointer",
-  //           }}
-  //           onClick={() => setFullScreenMode(null)}
-  //         >
-  //           {!fullScreenMode ? (
-  //             <AiOutlineFullscreen size={32} />
-  //           ) : (
-  //             <AiOutlineFullscreenExit size={32} />
-  //           )}
-  //         </button>
-  //       </div>
-
-  //       <More canvasEngineRef={canvasRef} />
-
-  //       {!fullScreenMode && (
-  //         <>
-  //           <div className="toolbar">
-  //             <Toolbar />
-  //           </div>
-  //           <div className="toolsetting">
-  //             <ToolSetting />
-  //           </div>
-  //         </>
-  //       )}
-
-  //       <canvas
-  //         style={{ border: "2px solid red" }}
-  //         className="main-canvas"
-  //         ref={canvasRef}
-  //       ></canvas>
-  //       <canvas
-  //         style={{ border: "2px solid black" }}
-  //         className="preview-canvas"
-  //         ref={previewRef}
-  //       ></canvas>
-  //       <div></div>
-  //     </div>
-  //   </>
-  // );
   if (mode === "edit")
     return (
       <main className="flex w-screen h-screen justify-between items-center">
@@ -136,7 +71,13 @@ export const DrawingCanvas = ({ mode }: { mode: "edit" | "review" }) => {
             ></canvas>
           </div>
         </section>
-        <ToolSetting />
+        <section className="border-l border-l-[rgba(255,255,255,0.1)] h-full p-4 flex flex-col gap-3">
+          <ToolSetting />
+          <DownloadOptions
+            canvasRef={canvasRef}
+            reviewCanvasRef={reviewCanvasRef}
+          />
+        </section>
       </main>
     );
   if (mode === "review")
@@ -148,75 +89,10 @@ export const DrawingCanvas = ({ mode }: { mode: "edit" | "review" }) => {
             ref={reviewCanvasRef}
           ></canvas>
         </section>
-        <section>
-          {/* --- Export Actions Group --- */}
-          <div className="px-3 py-1 text-[10px] font-bold text-neutral-500 uppercase tracking-wider select-none">
-            Export Canvas
-          </div>
-
-          <button
-            className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-neutral-300 rounded-lg hover:bg-white/5 active:scale-[0.98] transition-all duration-150 group"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (canvasRef && canvasRef.current)
-                ExportCanvas.saveAs(canvasRef.current, "png");
-              if (reviewCanvasRef && reviewCanvasRef.current)
-                ExportCanvas.saveAs(reviewCanvasRef.current, "png");
-            }}
-          >
-            <div className="flex items-center gap-3 mr-1">
-              <span className="material-symbols-outlined text-base text-neutral-500 group-hover:text-cyan-400 transition-colors">
-                image
-              </span>
-              Export as PNG
-            </div>
-            <span className="text-[10px] text-neutral-500 bg-neutral-900 border border-white/5 px-1.5 py-0.5 rounded uppercase font-mono group-hover:border-cyan-400/20 group-hover:text-cyan-400 transition-colors">
-              Lossless
-            </span>
-          </button>
-
-          <button
-            className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-neutral-300 rounded-lg hover:bg-white/5 active:scale-[0.98] transition-all duration-150 group"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (canvasRef && canvasRef.current)
-                ExportCanvas.saveAs(canvasRef.current, "webp");
-              if (reviewCanvasRef && reviewCanvasRef.current)
-                ExportCanvas.saveAs(reviewCanvasRef.current, "webp");
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-base text-neutral-500 group-hover:text-cyan-400 transition-colors">
-                photo_library
-              </span>
-              Export as WebP
-            </div>
-            <span className="text-[10px] text-neutral-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded uppercase font-mono">
-              Fast
-            </span>
-          </button>
-
-          <button
-            className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-neutral-300 rounded-lg hover:bg-white/5 active:scale-[0.98] transition-all duration-150 group"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (canvasRef && canvasRef.current)
-                ExportCanvas.saveAs(canvasRef.current, "jpeg");
-              if (reviewCanvasRef && reviewCanvasRef.current)
-                ExportCanvas.saveAs(reviewCanvasRef.current, "jpeg");
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-base text-neutral-500 group-hover:text-cyan-400 transition-colors">
-                collections
-              </span>
-              Export as JPG
-            </div>
-            <span className="text-[10px] text-neutral-500 bg-neutral-900 border border-white/5 px-1.5 py-0.5 rounded uppercase font-mono">
-              Flat
-            </span>
-          </button>
-        </section>
+        <DownloadOptions
+          canvasRef={canvasRef}
+          reviewCanvasRef={reviewCanvasRef}
+        />
       </main>
     );
 };

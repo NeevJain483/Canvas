@@ -1,10 +1,9 @@
 "use client";
-import React, { ChangeEvent, useEffect, useEffectEvent, useState } from "react";
-import ToolThicknessSlider from "@component/canvas/ToolThicknessSlider";
-import ToolColorSelector from "@component/canvas/ToolColorSelector";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { BrushSettings, useCanvasStore } from "@lib/store/canvasStore";
 import { useShallow } from "zustand/shallow";
 import { useProjectStore } from "@lib/store/projectStore";
+import DownloadOptions from "./DownloadOptions";
 
 const ToolSetting = () => {
   const [brushData, setBrushData] = useState<Partial<BrushSettings>>({
@@ -13,6 +12,21 @@ const ToolSetting = () => {
     brushHardness: 1,
     currentColor: "#fffff",
   });
+
+  const PALETTE_COLORS = [
+    "#000000", // Black
+    "#ffffff", // White
+    "#ef4444", // Red
+    "#f97316", // Orange
+    "#eab308", // Yellow
+    "#22c55e", // Green
+    "#06b6d4", // Cyan
+    "#3b82f6", // Blue
+    "#6366f1", // Indigo
+    "#a855f7", // Purple
+    "#ec4899", // Pink
+    "#64748b", // Slate Gray
+  ];
 
   const saveProject = useProjectStore((state) => state.saveProject);
   const isSaving = useProjectStore((state) => state.isSaving);
@@ -50,6 +64,15 @@ const ToolSetting = () => {
     setBrushSettings(updatedData);
   };
 
+  const handleColorChange = (color: string) => {
+    const updatedData = {
+      ...brushData,
+      currentColor: color,
+    };
+    setBrushData(updatedData);
+    setBrushSettings(updatedData);
+  };
+
   const currentOpacity =
     brushData.brushOpacity !== undefined ? brushData.brushOpacity : 1;
   const currentHardness =
@@ -67,10 +90,9 @@ const ToolSetting = () => {
       brushSize,
     });
   }, []);
-  4;
 
   return (
-    <section className="border-l border-l-[rgba(255,255,255,0.1)] h-full p-4 flex flex-col gap-3">
+    <section className="flex flex-col gap-3">
       <section className="flex items-center gap-3">
         <button
           className="material-symbols-outlined p-2 bg-primary/10 hover:bg-primary/20 active:bg-primary/30 border border-[rgba(255,255,255,0.1)] rounded-md cursor-pointer"
@@ -144,6 +166,31 @@ const ToolSetting = () => {
             value={brushData.currentColor}
             name="currentColor"
           />
+        </div>
+      </div>
+      <div>
+        <div className="grid grid-cols-5 gap-4">
+          {PALETTE_COLORS.map((color) => {
+            const isActive =
+              currentColor?.toLowerCase() === color.toLowerCase();
+
+            return (
+              <button
+                className="col-span-1 h-6 aspect-square"
+                key={color}
+                title={color}
+                onClick={() => handleColorChange(color)}
+                style={{
+                  background:color,
+                  border: isActive ? "3px solid #3b82f6" : "1px solid #cbd5e1",
+                  outline: isActive ? "2px solid white" : "none",
+                  transform: isActive ? "scale(1.1)" : "scale(1)",
+                  transition:
+                    "transform 0.1s ease, border-color 0.1s ease, outline 0.1s ease",
+                }}
+              />
+            );
+          })}
         </div>
       </div>
     </section>
