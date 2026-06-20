@@ -13,7 +13,7 @@ export function drawStroke(
   stroke: CanvasElementType,
 ) {
   ctx.save();
-
+  
   if (stroke.type === "eraser") {
     ctx.globalCompositeOperation = "destination-out";
   } else {
@@ -22,13 +22,15 @@ export function drawStroke(
       ctx.strokeStyle = stroke.color;
     }
   }
-
+  
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.globalAlpha = stroke.alpha;
   ctx.lineWidth = stroke.width;
 
   switch (stroke.type) {
     case "brush":
       ctx.fillStyle = stroke.color;
-      ctx.globalAlpha = 1;
       if (stroke.points.length === 1) {
         const point = stroke.points[0]!;
         ToolLogic.brush(ctx, point, point, stroke.width, 0.2);
@@ -159,10 +161,12 @@ export function loadCanvas(
   const { baseImageUrl, strokes } = currentProject.canvasState;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.save()
-  ctx.fillStyle = currentProject.project.background_color
+  if(currentProject.canvasState.strokes.length<=9){
+    ctx.save();
+  ctx.fillStyle = currentProject.project.background_color;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.restore()
+  ctx.restore();
+  }
   const drawVectorLayer = () => {
     strokes.forEach((stroke) => {
       drawStroke(ctx, stroke);

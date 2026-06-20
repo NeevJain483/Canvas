@@ -3,7 +3,6 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { BrushSettings, useCanvasStore } from "@lib/store/canvasStore";
 import { useShallow } from "zustand/shallow";
 import { useProjectStore } from "@lib/store/projectStore";
-import DownloadOptions from "./DownloadOptions";
 
 const ToolSetting = () => {
   const [brushData, setBrushData] = useState<Partial<BrushSettings>>({
@@ -176,17 +175,15 @@ const ToolSetting = () => {
 
             return (
               <button
-                className="col-span-1 h-6 aspect-square"
+                className="col-span-1 h-6 aspect-square transition-all duration-300"
                 key={color}
                 title={color}
                 onClick={() => handleColorChange(color)}
                 style={{
-                  background:color,
+                  background: color,
                   border: isActive ? "3px solid #3b82f6" : "1px solid #cbd5e1",
                   outline: isActive ? "2px solid white" : "none",
                   transform: isActive ? "scale(1.1)" : "scale(1)",
-                  transition:
-                    "transform 0.1s ease, border-color 0.1s ease, outline 0.1s ease",
                 }}
               />
             );

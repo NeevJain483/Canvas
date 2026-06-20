@@ -117,12 +117,16 @@ export const PointSchema = z.object({
 export const BrushStrokeSchema = z.object({
   type: z.literal("brush"),
   color: z.string(),
+  alpha: z.number(),
+  hardness: z.number(),
   width: z.number(),
   points: z.array(PointSchema),
 });
 export const EraserStrokeSchema = z.object({
   type: z.literal("eraser"),
   color: z.string().optional(),
+  alpha: z.number(),
+  hardness: z.number(),
   width: z.number(),
   points: z.array(PointSchema),
 });
@@ -130,6 +134,8 @@ export const EraserStrokeSchema = z.object({
 export const LineStrokeSchema = z.object({
   type: z.literal("line"),
   color: z.string(),
+  alpha: z.number(),
+  hardness: z.number(),
   width: z.number(),
   start_x: z.number(),
   start_y: z.number(),
@@ -140,6 +146,8 @@ export const LineStrokeSchema = z.object({
 export const RectangleStrokeSchema = z.object({
   type: z.literal("rectangle"),
   color: z.string(),
+  alpha: z.number(),
+  hardness: z.number(),
   width: z.number(),
   start_x: z.number(),
   start_y: z.number(),
@@ -149,6 +157,8 @@ export const RectangleStrokeSchema = z.object({
 export const EllipseStrokeSchema = z.object({
   type: z.literal("ellipse"),
   color: z.string(),
+  alpha: z.number(),
+  hardness: z.number(),
   width: z.number(),
   start_x: z.number(),
   start_y: z.number(),

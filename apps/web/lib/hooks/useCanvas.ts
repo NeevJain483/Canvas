@@ -23,7 +23,7 @@ export function useCanvas() {
   const setCurrentProject = useProjectStore((state) => state.setCurrentProject);
   const currentProjectRef = useRef(currentProject);
   const setCurrentProjectRef = useRef(setCurrentProject);
-  
+
   const currentTool = useCanvasStore((state) => state.currentTool);
   const currentToolRef = useRef(currentTool);
 
@@ -209,32 +209,48 @@ export function useCanvas() {
       engine.clearPreview();
       if (!currentProjectRef.current) return;
       if (activeTool === "brush") {
-        updateCurrentProject(currentProjectRef.current, setCurrentProjectRef.current, {
-          type: "brush",
-          color: state.currentColor,
-          width: state.brushSize,
-          points: [...pointsRef.current],
-        });
+        updateCurrentProject(
+          currentProjectRef.current,
+          setCurrentProjectRef.current,
+          {
+            type: "brush",
+            color: state.currentColor,
+            alpha: state.brushOpacity,
+            hardness: state.brushHardness,
+            width: state.brushSize,
+            points: [...pointsRef.current],
+          },
+        );
       } else if (activeTool === "eraser") {
-        updateCurrentProject(currentProjectRef.current, setCurrentProjectRef.current, {
-          type: "eraser",
-          width: state.brushSize,
-          points: [...pointsRef.current],
-        });
+        updateCurrentProject(
+          currentProjectRef.current,
+          setCurrentProjectRef.current,
+          {
+            type: "eraser",
+            width: state.brushSize,
+            alpha:state.brushOpacity,
+            hardness:state.brushHardness,
+            points: [...pointsRef.current],
+          },
+        );
       } else if (
         activeTool === "line" ||
         activeTool === "rectangle" ||
         activeTool === "ellipse"
       ) {
-        updateCurrentProject(currentProjectRef.current, setCurrentProjectRef.current, {
-          type: activeTool,
-          color: state.currentColor,
-          width: state.brushSize,
-          start_x: startX,
-          start_y: startY,
-          last_x: endX,
-          last_y: endY,
-        } as CanvasElementType);
+        updateCurrentProject(
+          currentProjectRef.current,
+          setCurrentProjectRef.current,
+          {
+            type: activeTool,
+            color: state.currentColor,
+            width: state.brushSize,
+            start_x: startX,
+            start_y: startY,
+            last_x: endX,
+            last_y: endY,
+          } as CanvasElementType,
+        );
       }
       pointsRef.current = [];
       lastPoint.current = null;

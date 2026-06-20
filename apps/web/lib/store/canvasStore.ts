@@ -24,7 +24,6 @@ export type BrushSettings = {
 };
 
 type CanvasStoreType = BrushSettings & {
-  fullScreenMode: boolean;
   //Drawing State
   currentTool: ToolType;
 
@@ -38,9 +37,6 @@ type CanvasStoreType = BrushSettings & {
   // layers: Layer[];
   // currentLayerId: UUID;
   // layerOrder: UUID[];
-
-  //
-  setFullScreenMode(value: boolean | null): void;
 
   // Drawing Actions
   setTool(tool: ToolType): void;
@@ -73,8 +69,6 @@ type CanvasStoreType = BrushSettings & {
 export const useCanvasStore = create<CanvasStoreType>()(
   persist(
     immer((set, get) => ({
-      fullScreenMode: false,
-
       // Drawing state
       currentTool: "brush",
       brushSize: 8,
@@ -88,13 +82,6 @@ export const useCanvasStore = create<CanvasStoreType>()(
       canvasHistoryIndex: -1,
       maxHistorySize: 50,
       isDirty: true,
-
-      //
-      setFullScreenMode: (value: boolean | null = null) => {
-        set((state) => ({
-          fullScreenMode: value === null ? !state.fullScreenMode : value,
-        }));
-      },
 
       //Drawing Action
       setTool(tool: ToolType) {
@@ -175,7 +162,11 @@ export const useCanvasStore = create<CanvasStoreType>()(
       name: "canvas-store",
       partialize: (state) => ({
         currentTool: state.currentTool,
+        brushSize: state.brushSize,
+        brushOpacity: state.brushOpacity,
+        brushHardness: state.brushHardness,
         currentColor: state.currentColor,
+        brushBlendMode: state.brushBlendMode,
       }),
     },
   ),
