@@ -3,9 +3,9 @@ name: Deploy Backend
 on:
   push:
     branches: [production]
-    paths: 
-        - 'apps/http-server/**'
-        - 'dockerfiles/Dockerfile.backend'
+    # paths: 
+    #     - 'apps/http-server/**'
+    #     - 'dockerfiles/Dockerfile.backend'
 
 jobs:
   build-and-push-backend:
