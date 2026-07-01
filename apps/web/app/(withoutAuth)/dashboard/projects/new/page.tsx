@@ -1,7 +1,7 @@
 "use client";
 import { useProjectStore } from "@lib/store/projectStore";
 import { useRouter } from "next/navigation";
-import React, { ChangeEvent, ChangeEventHandler, useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { useShallow } from "zustand/shallow";
 
 const Page = () => {
